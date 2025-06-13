@@ -48,13 +48,12 @@ createApp({
      // Contador para IDs de nuevas mesas
     const proximoIdMesa = ref(
       Math.max(
-        0, // Asegura que al menos empezamos en 1 si no hay mesas
+        0,
         ...mesasIndividuales.value.map(m => typeof m.id === 'number' ? m.id : 0),
         ...grupos.value.flatMap(g => g.mesas.map(gm => typeof gm.id === 'number' ? gm.id : 0))
       ) + 1
     );
 
-    // Mover la definición de eliminarMesaSeleccionada aquí
     const eliminarMesaSeleccionada = () => {
       if (mesasSeleccionadas.value.length !== 1) {
         alert("Por favor, seleccione una única mesa para eliminar.");
@@ -70,7 +69,7 @@ createApp({
 
       if (confirm(`¿Está seguro de que desea eliminar la Mesa ${mesaIdAEliminar}? Esta acción no se puede deshacer.`)) {
         mesasIndividuales.value = mesasIndividuales.value.filter(m => m.id !== mesaIdAEliminar);
-        mesasSeleccionadas.value = []; // Deseleccionar
+        mesasSeleccionadas.value = [];
       }
     };
 
@@ -78,14 +77,10 @@ createApp({
       const nuevaMesa = {
         id: proximoIdMesa.value,
         estado: ESTADOS_MESA.DISPONIBLE,
-        capacidad: 4, // Capacidad por defecto
-        x: 20, // Posición inicial por defecto
+        capacidad: 4,
+        x: 20,
         y: 20,
-        // width: 150, // Definido por CSS .mesa
-        // height: 110, // Definido por CSS .mesa
       };
-
-      // Ya no se define eliminarMesaSeleccionada aquí
 
       mesasIndividuales.value.push(nuevaMesa);
       proximoIdMesa.value++;
@@ -125,7 +120,6 @@ createApp({
     const handleStartDrag = (event, item, type) => {
       startDrag(event, item, type, draggingItem, dragStartPos, dragPosition);
       
-      // Establecer tamaño del indicador según el tipo
       if (type === "mesa") {
         dragIndicatorSize.width = 150;
         dragIndicatorSize.height = 110;

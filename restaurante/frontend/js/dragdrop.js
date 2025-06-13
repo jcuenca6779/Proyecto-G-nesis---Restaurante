@@ -69,23 +69,23 @@ export function onDragMove(
     const currentDraggedItemX = newX;
     const currentDraggedItemY = newY;
 
+    // Buscar mesas individuales cercanas (dentro de 100 píxeles)
     const targetMesa = mesasIndividuales.value.find((mesa) => {
       if (mesa.id === draggingItem.value.id) return false;
-      const distDx = Math.abs(mesa.x - currentDraggedItemX);
-      const distDy = Math.abs(mesa.y - currentDraggedItemY);
-      const distancia = Math.sqrt(distDx * distDx + distDy * distDy);
-      return distancia < 150;
+      const distX = Math.abs(mesa.x - currentDraggedItemX);
+      const distY = Math.abs(mesa.y - currentDraggedItemY);
+      return distX < 100 && distY < 100;
     });
 
     if (targetMesa) {
       dropTarget.value = targetMesa.id;
     }
 
+    // Buscar grupos cercanos (dentro de 150 píxeles)
     const targetGrupo = grupos.value.find((grupo) => {
-      const distDx = Math.abs(grupo.x - currentDraggedItemX);
-      const distDy = Math.abs(grupo.y - currentDraggedItemY);
-      const distancia = Math.sqrt(distDx * distDx + distDy * distDy);
-      return distancia < 150; // Proximity threshold for dropping a mesa onto a group
+      const distX = Math.abs(grupo.x - currentDraggedItemX);
+      const distY = Math.abs(grupo.y - currentDraggedItemY);
+      return distX < 150 && distY < 150;
     });
 
     if (targetGrupo) {
@@ -125,6 +125,8 @@ export function handleDrop(
       stopDragFn(draggingItem, dropTarget, dropTargetGroup);
       return;
     }
+
+    // Prioridad 1: Unir a un grupo si hay uno cercano
     if (dropTargetGroup.value) {
       const grupo = grupos.value.find((g) => g.id === dropTargetGroup.value);
       if (grupo && mesaOrigen) {
@@ -136,13 +138,20 @@ export function handleDrop(
           showUnionFeedback
         );
       }
-    } else if (target && target.id && target.id !== mesaOrigen.id) {
+    }
+    // Prioridad 2: Unir a una mesa individual si hay una cercana
+    else if (dropTarget.value) {
       const mesaDestino = mesasIndividuales.value.find(
-        (m) => m.id === target.id
+        (m) => m.id === dropTarget.value
       );
-      // Asegurarse de que el 'target' es una mesa individual válida y diferente de la origen
-      if (mesaDestino) {
-        unirMesas(mesaOrigen, mesaDestino);
+      if (mesaDestino && mesaDestino.id !== mesaOrigen.id) {
+        unirMesas(
+          mesaOrigen, 
+          mesaDestino, 
+          mesasIndividuales, 
+          grupos, 
+          showUnionFeedback
+        );
       }
     }
   }

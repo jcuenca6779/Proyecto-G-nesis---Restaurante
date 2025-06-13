@@ -14,10 +14,6 @@ export function cambiarEstado(
     const mesa = mesasIndividuales.value.find((m) => m.id === mesaId);
     if (!mesa) return;
 
-    console.log(`Intentando cambiar estado de mesa ${mesa.id}:`);
-    console.log(`Estado actual en datos: ${mesa.estado}`);
-    console.log(`Nuevo estado deseado: ${nuevoEstado}`);
-
     if (
       mesa.estado === ESTADOS_MESA.OCUPADA &&
       nuevoEstado === ESTADOS_MESA.RESERVADA
