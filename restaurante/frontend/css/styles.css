@@ -177,17 +177,16 @@ body {
   background-color: grey;
   border: 1px solid #555;
   user-select: none;
-  /* Podrías añadir aquí z-index si necesitas que estén por debajo de las mesas */
 }
 .layout-elemento.pared {
-  background-color: #A9A9A9; /* DarkGray */
+  background-color: #A9A9A9;
 }
 .layout-elemento.barra {
-  background-color: #8B4513; /* SaddleBrown */
+  background-color: #8B4513;
 }
 .layout-elemento.planta {
-  background-color: #228B22; /* ForestGreen */
-  width: 50px !important; /* Ejemplo de tamaño fijo */
+  background-color: #228B22;
+  width: 50px !important;
   height: 50px !important;
   border-radius: 50%;
 }
@@ -291,6 +290,13 @@ body {
   transition: all 0.2s ease;
 }
 
+/* ESTILO PARA GRUPOS CUANDO SON OBJETIVO DE DROP */
+.mesa-grupo.drop-target {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px #f1c40f, 0 0 20px rgba(241, 196, 15, 0.6);
+  z-index: 50;
+}
+
 .grupo-seleccionado {
   box-shadow: 0 0 0 6px #f1c40f, 0 0 30px rgba(241, 196, 15, 0.8);
   transform: scale(1.05);
@@ -345,12 +351,6 @@ body {
   z-index: 5;
 }
 
-.grupo-seleccionado {
-  box-shadow: 0 0 0 4px #f1c40f, 0 0 25px rgba(241, 196, 15, 0.8);
-  transform: scale(1.05);
-  z-index: 5;
-}
-
 .stats {
   background: #2c3e50;
   color: white;
@@ -393,7 +393,7 @@ body {
 /* Indicador de arrastre rectangular */
 .drag-indicator {
   position: absolute;
-  border-radius: 15px; /* Igual que los grupos */
+  border-radius: 15px;
   background: rgba(46, 204, 113, 0.3);
   border: 2px dashed #2ecc71;
   pointer-events: none;
@@ -404,7 +404,6 @@ body {
   font-weight: bold;
   color: #27ae60;
   font-size: 1.2rem;
-  /* Tamaño dinámico (se establecerá desde JS) */
   transition: width 0.2s ease, height 0.2s ease;
 }
 
@@ -487,12 +486,12 @@ body {
 }
 
 .mesa.redonda {
-  width: 120px; /* o el tamaño que desees */
+  width: 120px;
   height: 120px;
   border-radius: 50%;
 }
 .mesa.cuadrada {
   width: 100px;
   height: 100px;
-  border-radius: 5px; /* ligero redondeo o 0 */
+  border-radius: 5px;
 }

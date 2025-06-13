@@ -74,7 +74,7 @@ export function onDragMove(
       if (mesa.id === draggingItem.value.id) return false;
       const distX = Math.abs(mesa.x - currentDraggedItemX);
       const distY = Math.abs(mesa.y - currentDraggedItemY);
-      return distX < 100 && distY < 100;
+      return distX < 150 && distY < 110;
     });
 
     if (targetMesa) {
@@ -85,7 +85,7 @@ export function onDragMove(
     const targetGrupo = grupos.value.find((grupo) => {
       const distX = Math.abs(grupo.x - currentDraggedItemX);
       const distY = Math.abs(grupo.y - currentDraggedItemY);
-      return distX < 150 && distY < 150;
+      return distX < 150 && distY < 100;
     });
 
     if (targetGrupo) {
