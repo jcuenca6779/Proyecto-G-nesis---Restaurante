@@ -17,12 +17,10 @@ import { startDrag, onDragMove, stopDrag, handleDrop } from "./dragdrop.js";
 
 createApp({
   setup() {
-    // Dimensiones del mapa
     const mapWidth = 1290;
     const mapHeight = 897;
     const dragIndicatorSize = reactive({ width: 150, height: 110 });
 
-    // Estado reactivo
     const mesasIndividuales = ref([
       { id: 1, estado: ESTADOS_MESA.DISPONIBLE, capacidad: 4, x: 50, y: 50 },
       { id: 2, estado: ESTADOS_MESA.DISPONIBLE, capacidad: 4, x: 200, y: 250 },
@@ -43,9 +41,11 @@ createApp({
     const dropTarget = ref(null);
     const dropTargetGroup = ref(null);
     const showUnionFeedback = ref(false);
-    const elementosDecorativos = ref([])
+    const elementosDecorativos = ref([]);
+    
+    // Nuevo estado para mostrar instrucciones
+    const showInstructions = ref(false);
 
-     // Contador para IDs de nuevas mesas
     const proximoIdMesa = ref(
       Math.max(
         0,
@@ -53,6 +53,16 @@ createApp({
         ...grupos.value.flatMap(g => g.mesas.map(gm => typeof gm.id === 'number' ? gm.id : 0))
       ) + 1
     );
+
+    const deshabilitarReservada = computed(() => {
+      if (mesasSeleccionadas.value.length !== 1) return true;
+      
+      const mesa = mesasIndividuales.value.find(
+        m => m.id === mesasSeleccionadas.value[0]
+      );
+      
+      return mesa && esMesaOcupada(mesa);
+    });
 
     const eliminarMesaSeleccionada = () => {
       if (mesasSeleccionadas.value.length !== 1) {
@@ -73,7 +83,7 @@ createApp({
       }
     };
 
-     const agregarMesaNueva = () => {
+    const agregarMesaNueva = () => {
       const nuevaMesa = {
         id: proximoIdMesa.value,
         estado: ESTADOS_MESA.DISPONIBLE,
@@ -89,7 +99,6 @@ createApp({
        });
     };
 
-    // Estadísticas
     const estadisticas = computed(() => {
       let disponibles = 0,
         ocupadas = 0,
@@ -116,7 +125,6 @@ createApp({
       };
     });
 
-    // Wrappers para drag & drop
     const handleStartDrag = (event, item, type) => {
       startDrag(event, item, type, draggingItem, dragStartPos, dragPosition);
       
@@ -169,7 +177,6 @@ createApp({
         showUnionFeedback
       );
 
-    // Selección de mesas y grupos
     const seleccionarMesaIndividual = (id) => {
       grupoSeleccionado.value = null;
       if (mesasSeleccionadas.value.includes(id)) {
@@ -185,6 +192,11 @@ createApp({
     };
 
     const esMesaOcupada = (mesa) => mesa && mesa.estado === ESTADOS_MESA.OCUPADA;
+    
+    // Función para alternar las instrucciones
+    const toggleInstructions = () => {
+      showInstructions.value = !showInstructions.value;
+    };
 
     return {
       mesasIndividuales,
@@ -202,6 +214,9 @@ createApp({
       showUnionFeedback,
       elementosDecorativos,
       esMesaOcupada,
+      deshabilitarReservada,
+      showInstructions, // Nuevo estado
+      toggleInstructions, // Nueva función
       handleStartDrag,
       handleDragMove,
       handleStopDrag,

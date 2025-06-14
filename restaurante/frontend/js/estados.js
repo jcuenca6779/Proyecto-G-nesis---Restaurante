@@ -1,10 +1,9 @@
 // Definición de estados y colores
+// estados.js
 export const ESTADOS_MESA = {
-  DISPONIBLE: "disponible",
-  OCUPADA: "ocupada",
-  RESERVADA: "reservada",
-  LIMPIEZA: "limpieza",
-  ESPECIAL: "especial",
+  DISPONIBLE: 'disponible',
+  OCUPADA: 'ocupada',
+  RESERVADA: 'reservada'
 };
 
 export const COLORES_ESTADO = {

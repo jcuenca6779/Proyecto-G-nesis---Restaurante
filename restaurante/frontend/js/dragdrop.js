@@ -45,7 +45,6 @@ export function onDragMove(
   dragPosition.x = newX;
   dragPosition.y = newY;
 
-  // Actualizar la posición real del elemento en los datos reactivos
   if (draggingItem.value.type === "mesa") {
     const mesa = mesasIndividuales.value.find(
       (m) => m.id === draggingItem.value.id
@@ -69,7 +68,6 @@ export function onDragMove(
     const currentDraggedItemX = newX;
     const currentDraggedItemY = newY;
 
-    // Buscar mesas individuales cercanas (dentro de 100 píxeles)
     const targetMesa = mesasIndividuales.value.find((mesa) => {
       if (mesa.id === draggingItem.value.id) return false;
       const distX = Math.abs(mesa.x - currentDraggedItemX);
@@ -81,7 +79,6 @@ export function onDragMove(
       dropTarget.value = targetMesa.id;
     }
 
-    // Buscar grupos cercanos (dentro de 150 píxeles)
     const targetGrupo = grupos.value.find((grupo) => {
       const distX = Math.abs(grupo.x - currentDraggedItemX);
       const distY = Math.abs(grupo.y - currentDraggedItemY);
@@ -126,7 +123,6 @@ export function handleDrop(
       return;
     }
 
-    // Prioridad 1: Unir a un grupo si hay uno cercano
     if (dropTargetGroup.value) {
       const grupo = grupos.value.find((g) => g.id === dropTargetGroup.value);
       if (grupo && mesaOrigen) {
@@ -139,7 +135,6 @@ export function handleDrop(
         );
       }
     }
-    // Prioridad 2: Unir a una mesa individual si hay una cercana
     else if (dropTarget.value) {
       const mesaDestino = mesasIndividuales.value.find(
         (m) => m.id === dropTarget.value

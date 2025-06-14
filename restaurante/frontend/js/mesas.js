@@ -1,7 +1,6 @@
 import { ESTADOS_MESA } from "./estados.js";
 import { ref } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
 
-// Declarar grupos como un array reactivo
 export const grupos = ref([]);
 
 export function cambiarEstado(
@@ -27,7 +26,6 @@ export function cambiarEstado(
   }
 }
 
-// Función para unir mesas
 export function unirMesas(
   mesa1,
   mesa2,
@@ -35,7 +33,6 @@ export function unirMesas(
   grupos,
   showUnionFeedback
 ) {
-  // Verificar que ambas mesas estén disponibles
   if (
     mesa1.estado !== ESTADOS_MESA.DISPONIBLE ||
     mesa2.estado !== ESTADOS_MESA.DISPONIBLE
@@ -44,7 +41,6 @@ export function unirMesas(
     return false;
   }
 
-  // Crear el grupo (posición promedio de las mesas)
   const grupoId = "G" + Date.now().toString().slice(-3);
   const x = (mesa1.x + mesa2.x) / 2;
   const y = (mesa1.y + mesa2.y) / 2;
@@ -63,12 +59,10 @@ export function unirMesas(
     height: 250,
   });
 
-  // Eliminar las mesas individuales
   mesasIndividuales.value = mesasIndividuales.value.filter(
     (mesa) => mesa.id !== mesa1.id && mesa.id !== mesa2.id
   );
 
-  // Mostrar feedback visual
   showUnionFeedback.value = true;
   setTimeout(() => (showUnionFeedback.value = false), 1200);
 }
@@ -115,15 +109,14 @@ export function unirMesaAGrupo(
     alert("Solo se pueden unir mesas disponibles a un grupo");
     return;
   }
-  // Añadir la mesa al grupo
+  
   grupo.mesas.push({ id: mesa.id, capacidad: mesa.capacidad });
   grupo.capacidadTotal += mesa.capacidad;
 
-  // Eliminar la mesa individual
   mesasIndividuales.value = mesasIndividuales.value.filter(
     (m) => m.id !== mesa.id
   );
-  // Mostrar feedback visual
+  
   showUnionFeedback.value = true;
   setTimeout(() => (showUnionFeedback.value = false), 2000);
 

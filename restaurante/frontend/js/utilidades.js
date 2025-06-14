@@ -1,5 +1,15 @@
-import { COLORES_ESTADO } from "./estados.js";
+// utilidades.js
+import { ESTADOS_MESA } from "./estados.js";
 
 export function obtenerColor(estado) {
-  return COLORES_ESTADO[estado] || "#95a5a6";
+  switch (estado) {
+    case ESTADOS_MESA.DISPONIBLE:
+      return '#2ecc71';
+    case ESTADOS_MESA.OCUPADA:
+      return '#e74c3c';
+    case ESTADOS_MESA.RESERVADA:
+      return '#f1c40f';
+    default:
+      return '#95a5a6';
+  }
 }

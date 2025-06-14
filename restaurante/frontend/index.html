@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Visualización de Mesas</title>
     <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   </head>
   <body>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
@@ -17,108 +18,144 @@
 
         <div class="main-content">
           <div class="controls-panel">
-            <div class="actions">
-              <p>
-                <span class="highlight">Para cambiar estado:</span> Seleccione
-                UNA mesa y luego elija un estado
-              </p>
-              <p>
-                <span class="highlight">Para unir mesas:</span> Arrastre una
-                mesa sobre otra para unirlas
-              </p>
-              <p>
-                <span class="highlight">Para separar:</span> Haga clic en un
-                grupo y luego en el botón "Separar"
-              </p>
-              <p>
-                <span class="highlight">Para mover:</span> Arrastre una mesa o
-                grupo a la posición deseada
-              </p>
-            </div>
-
-            <div class="controls">
-              <button
-                class="badge disponible"
-                @click="cambiarEstado(ESTADOS_MESA.DISPONIBLE)"
-                :disabled="mesasSeleccionadas.length !== 1"
-              >
-                <span>✅</span> Disponible
-              </button>
-              <button
-                class="badge ocupada"
-                @click="cambiarEstado(ESTADOS_MESA.OCUPADA)"
-                :disabled="mesasSeleccionadas.length !== 1"
-              >
-                <span>⛔</span> Ocupada
-              </button>
-              <button
-                class="badge reservada"
-                @click="cambiarEstado(ESTADOS_MESA.RESERVADA)"
-                :disabled="mesasSeleccionadas.length !== 1 || (mesasSeleccionadas.length === 1 && esMesaOcupada(mesasIndividuales.find(m => m.id === mesasSeleccionadas[0])))"
-              >
-                <span>📅</span> Reservada
-              </button>
-              <button
-                class="badge disponible"
-                @click="separarGrupoSeleccionado"
-                :disabled="!grupoSeleccionado"
-                style="background: linear-gradient(to bottom, #9b59b6, #8e44ad)"
-              >
-                <span>✂️</span> Separar grupo
-              </button>
-              <button 
-                class="badge" 
-                @click="agregarMesaNueva" 
-                style="background: linear-gradient(to bottom, #1abc9c, #16a085);"
-              >
-                <span>➕</span> Añadir Mesa
-              </button>
-              <button 
-                class="badge" 
-                @click="eliminarMesaSeleccionada" 
-                :disabled="mesasSeleccionadas.length !== 1" 
-                style="background: linear-gradient(to bottom, #c0392b, #e74c3c);"
-              >
-                <span>➖</span> Eliminar Mesa
+            <div class="panel-header">
+              <h2>Controles</h2>
+              <button class="help-button" @click="toggleInstructions">
+                <i class="fas fa-question-circle"></i>
               </button>
             </div>
-
-            <div
-              v-if="mesasSeleccionadas.length === 1 && mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]) && esMesaOcupada(mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]))"
-              class="status-info"
-            >
-              ⚠️ ¡Atención! La mesa está ocupada y no puede ser marcada como
-              reservada
+            
+            <div class="controls-grid">
+              <div class="control-group">
+                <h3>Estado de Mesa</h3>
+                <div class="button-group">
+                  <button
+                    class="badge disponible"
+                    @click="cambiarEstado(ESTADOS_MESA.DISPONIBLE)"
+                    :disabled="mesasSeleccionadas.length !== 1"
+                  >
+                    <span>✅</span> Disponible
+                  </button>
+                  <button
+                    class="badge ocupada"
+                    @click="cambiarEstado(ESTADOS_MESA.OCUPADA)"
+                    :disabled="mesasSeleccionadas.length !== 1"
+                  >
+                    <span>⛔</span> Ocupada
+                  </button>
+                  <button
+                    class="badge reservada"
+                    @click="cambiarEstado(ESTADOS_MESA.RESERVADA)"
+                    :disabled="deshabilitarReservada"
+                  >
+                    <span>📅</span> Reservada
+                  </button>
+                </div>
+              </div>
+              
+              <div class="control-group">
+                <h3>Acciones de Grupo</h3>
+                <div class="button-group">
+                  <button
+                    class="badge separar"
+                    @click="separarGrupoSeleccionado"
+                    :disabled="!grupoSeleccionado"
+                  >
+                    <span>✂️</span> Separar grupo
+                  </button>
+                </div>
+              </div>
+              
+              <div class="control-group">
+                <h3>Gestión de Mesas</h3>
+                <div class="button-group">
+                  <button 
+                    class="badge add" 
+                    @click="agregarMesaNueva" 
+                  >
+                    <span>➕</span> Añadir Mesa
+                  </button>
+                  <button 
+                    class="badge delete" 
+                    @click="eliminarMesaSeleccionada" 
+                    :disabled="mesasSeleccionadas.length !== 1" 
+                  >
+                    <span>➖</span> Eliminar Mesa
+                  </button>
+                </div>
+              </div>
             </div>
-            <div v-if="mesasSeleccionadas.length > 0" class="uniones-info"></div>
-
-            <div v-if="mesasSeleccionadas.length > 0" class="uniones-info">
-              Mesa seleccionada: {{ mesasSeleccionadas.join(', ') }}
+            
+            <div class="info-section">
+              <div
+                v-if="mesasSeleccionadas.length === 1 && mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]) && esMesaOcupada(mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]))"
+                class="status-info"
+              >
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                  <strong>¡Atención!</strong>
+                  <p>La mesa está ocupada y no puede ser marcada como reservada</p>
+                </div>
+              </div>
+              
+              <div v-if="mesasSeleccionadas.length > 0" class="selection-info">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                  <strong>Mesa seleccionada:</strong>
+                  <p>{{ mesasSeleccionadas.join(', ') }}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-<div class="map-container">
-  <div
-    class="restaurant-map"
-    @mousemove="handleDragMove"
-    @mouseup="handleStopDrag"
-    @mouseleave="handleStopDrag"
-  >
-    <div v-for="elemento in elementosDecorativos" :key="elemento.id"
-      class="layout-elemento"
-      :class="[elemento.tipo]"
-      :style="{ 
-        left: elemento.x + 'px', top: elemento.y + 'px', 
-        width: elemento.width + 'px', height: elemento.height + 'px',
-        transform: 'rotate(' + (elemento.rotacion || 0) + 'deg)',
-        backgroundColor: elemento.color 
-      }">
-      <!-- Opcional: icono o texto para identificar el tipo -->
-    </div>
-    <!-- Límite del mapa -->
-    <div class="map-boundary"></div>
+          <div class="map-container">
+            <!-- Modal de instrucciones -->
+            <div v-if="showInstructions" class="modal" @click.self="showInstructions = false">
+              <div class="modal-content">
+                <button class="modal-close" @click="showInstructions = false">
+                  <i class="fas fa-times"></i>
+                </button>
+                <h2>Instrucciones de Uso</h2>
+                <div class="instructions">
+                  <p>
+                    <span class="highlight">Para cambiar estado:</span> Seleccione
+                    UNA mesa y luego elija un estado
+                  </p>
+                  <p>
+                    <span class="highlight">Para unir mesas:</span> Arrastre una
+                    mesa sobre otra para unirlas
+                  </p>
+                  <p>
+                    <span class="highlight">Para separar:</span> Haga clic en un
+                    grupo y luego en el botón "Separar"
+                  </p>
+                  <p>
+                    <span class="highlight">Para mover:</span> Arrastre una mesa o
+                    grupo a la posición deseada
+                  </p>
+                </div>
+              </div>
+            </div>
 
-              <!-- Indicador visual de arrastre -->
+            <div
+              class="restaurant-map"
+              @mousemove="handleDragMove"
+              @mouseup="handleStopDrag"
+              @mouseleave="handleStopDrag"
+            >
+              <div v-for="elemento in elementosDecorativos" :key="elemento.id"
+                class="layout-elemento"
+                :class="[elemento.tipo]"
+                :style="{ 
+                  left: elemento.x + 'px', top: elemento.y + 'px', 
+                  width: elemento.width + 'px', height: elemento.height + 'px',
+                  transform: 'rotate(' + (elemento.rotacion || 0) + 'deg)',
+                  backgroundColor: elemento.color 
+                }">
+              </div>
+              
+              <div class="map-boundary"></div>
+
               <div
                 v-if="draggingItem"
                 class="drag-indicator"
@@ -126,26 +163,24 @@
                   left: dragPosition.x + 'px',
                   top: dragPosition.y + 'px',
                   width: dragIndicatorSize.width + 'px',
-                height: dragIndicatorSize.height + 'px'
+                  height: dragIndicatorSize.height + 'px'
                 }"
               >
                 {{ draggingItem.id }}
               </div>
 
-              <!-- Feedback de unión exitosa -->
               <div class="union-feedback" :class="{ show: showUnionFeedback }">
                 ¡Mesas unidas con éxito!
               </div>
 
-              <!-- Mostrar grupos de mesas unidas -->
               <div
                 v-for="grupo in grupos"
                 :key="grupo.id"
                 class="mesa-grupo"
                 :class="{ 
-                'grupo-seleccionado': grupoSeleccionado === grupo.id,
-                'dragging': draggingItem && draggingItem.type === 'grupo' && draggingItem.id === grupo.id
-              }"
+                  'grupo-seleccionado': grupoSeleccionado === grupo.id,
+                  'dragging': draggingItem && draggingItem.type === 'grupo' && draggingItem.id === grupo.id
+                }"
                 :style="{ left: grupo.x + 'px', top: grupo.y + 'px' }"
                 @mousedown="handleStartDrag($event, grupo, 'grupo')"
                 @click="seleccionarGrupo(grupo.id)"
@@ -155,13 +190,11 @@
                   Capacidad: {{ grupo.capacidadTotal }}
                 </div>
                 <div class="grupo-info">Estado: {{ grupo.estado }}</div>
-                <!-- Mostrar mesas del grupo -->
                 <div class="grupo-info" style="font-size: 0.9rem">
                   Mesas: {{ grupo.mesas.map(m => m.id).join(', ') }}
                 </div>
               </div>
 
-              <!-- Mostrar mesas individuales rectangulares -->
               <div
                 v-for="mesa in mesasIndividuales"
                 :key="mesa.id"
@@ -171,10 +204,10 @@
                   'drop-target': dropTarget === mesa.id
                 }]"
                 :style="{
-                backgroundColor: obtenerColor(mesa.estado),
-                left: mesa.x + 'px',
-                top: mesa.y + 'px'
-              }"
+                  backgroundColor: obtenerColor(mesa.estado),
+                  left: mesa.x + 'px',
+                  top: mesa.y + 'px'
+                }"
                 @mousedown="handleStartDrag($event, mesa, 'mesa')"
                 @mousemove="handleDragMove"
                 @mouseup="handleDropWrapper($event, mesa)"
@@ -188,7 +221,6 @@
           </div>
         </div>
 
-        <!-- Estadísticas colocadas abajo -->
         <div class="stats" style="position: relative">
           <div class="stat-item">
             <div>Mesas disponibles</div>
