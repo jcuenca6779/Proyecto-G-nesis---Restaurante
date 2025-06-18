@@ -5,7 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Visualización de Mesas</title>
     <link rel="stylesheet" href="./css/styles.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* Estilos para quitar flechas de inputs numéricos */
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+
+      /* Estilos para los controles de número */
+      .number-control {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .number-control input {
+        width: 100px;
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin: 0 10px;
+        font-size: 1rem;
+        background-color: #f8f9fa;
+      }
+
+      .number-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background-color: #3498db;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .number-btn:hover {
+        background-color: #2980b9;
+      }
+
+      .size-controls {
+        display: flex;
+        gap: 20px;
+        margin-top: 10px;
+      }
+
+      .dimension-control {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .dimension-control label {
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      .dimension-control .number-control {
+        margin: 0;
+      }
+
+      .size-preview {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+      }
+
+      .preview-label {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2c3e50;
+      }
+
+      .mesa-preview {
+        margin: 0 auto;
+        background: #3498db;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .mesa-preview.cuadrada {
+        border-radius: 5px;
+      }
+
+      .mesa-preview.redonda {
+        border-radius: 50%;
+      }
+
+      .size-indicator {
+        text-align: center;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #7f8c8d;
+      }
+    </style>
   </head>
   <body>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
@@ -13,7 +118,7 @@
       <div class="container">
         <div class="header">
           <h1>SISTEMA DE GESTIÓN DE MESAS</h1>
-          <p>"El patacón de Óscar" - Mapa Interactivo</p>
+          <p>"El patacón de Óscar"</p>
         </div>
 
         <div class="main-content">
@@ -24,85 +129,66 @@
                 <i class="fas fa-question-circle"></i>
               </button>
             </div>
-            
+
             <div class="controls-grid">
-              <div class="control-group">
-                <h3>Estado de Mesa</h3>
-                <div class="button-group">
-                  <button
-                    class="badge disponible"
-                    @click="cambiarEstado(ESTADOS_MESA.DISPONIBLE)"
-                    :disabled="mesasSeleccionadas.length !== 1"
-                  >
-                    <span>✅</span> Disponible
-                  </button>
-                  <button
-                    class="badge ocupada"
-                    @click="cambiarEstado(ESTADOS_MESA.OCUPADA)"
-                    :disabled="mesasSeleccionadas.length !== 1"
-                  >
-                    <span>⛔</span> Ocupada
-                  </button>
-                  <button
-                    class="badge reservada"
-                    @click="cambiarEstado(ESTADOS_MESA.RESERVADA)"
-                    :disabled="deshabilitarReservada"
-                  >
-                    <span>📅</span> Reservada
-                  </button>
-                </div>
-              </div>
-              
-              <div class="control-group">
-                <h3>Acciones de Grupo</h3>
-                <div class="button-group">
-                  <button
-                    class="badge separar"
-                    @click="separarGrupoSeleccionado"
-                    :disabled="!grupoSeleccionado"
-                  >
-                    <span>✂️</span> Separar grupo
-                  </button>
-                </div>
-              </div>
-              
+              <!-- Gestión de Mesas (siempre visible) -->
               <div class="control-group">
                 <h3>Gestión de Mesas</h3>
                 <div class="button-group">
-                  <button 
-                    class="badge add" 
-                    @click="agregarMesaNueva" 
-                  >
+                  <button class="badge add" @click="agregarMesaNueva">
                     <span>➕</span> Añadir Mesa
                   </button>
-                  <button 
-                    class="badge delete" 
-                    @click="eliminarMesaSeleccionada" 
-                    :disabled="mesasSeleccionadas.length !== 1" 
+                  <button
+                    class="badge delete"
+                    @click="eliminarMesaSeleccionada"
+                    :disabled="mesasSeleccionadas.length !== 1"
                   >
                     <span>➖</span> Eliminar Mesa
                   </button>
                 </div>
               </div>
-            </div>
-            
-            <div class="info-section">
-              <div
-                v-if="mesasSeleccionadas.length === 1 && mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]) && esMesaOcupada(mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]))"
-                class="status-info"
-              >
-                <i class="fas fa-exclamation-triangle"></i>
-                <div>
-                  <strong>¡Atención!</strong>
-                  <p>La mesa está ocupada y no puede ser marcada como reservada</p>
+
+              <!-- Información de Mesa Seleccionada (solo cuando hay mesa individual seleccionada) -->
+              <div v-if="mesasSeleccionadas.length > 0" class="info-section">
+                <div class="selection-info">
+                  <i class="fas fa-check-circle"></i>
+                  <div>
+                    <strong>Mesa seleccionada:</strong>
+                    <p>{{ mesasSeleccionadas.join(', ') }}</p>
+                    <button
+                      class="btn-editar-mesa"
+                      @click="abrirMenuMesa(mesasSeleccionadas[0])"
+                    >
+                      <i class="fas fa-edit"></i> Editar Mesa
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Advertencia si la mesa está ocupada -->
+                <div
+                  v-if="mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]) && esMesaOcupada(mesasIndividuales.find(m => m.id === mesasSeleccionadas[0]))"
+                  class="status-info"
+                >
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <div>
+                    <strong>¡Atención!</strong>
+                    <p>
+                      La mesa está ocupada y no puede ser marcada como reservada
+                    </p>
+                  </div>
                 </div>
               </div>
-              
-              <div v-if="mesasSeleccionadas.length > 0" class="selection-info">
-                <i class="fas fa-check-circle"></i>
-                <div>
-                  <strong>Mesa seleccionada:</strong>
-                  <p>{{ mesasSeleccionadas.join(', ') }}</p>
+
+              <!-- Acciones de Grupo (solo cuando hay grupo seleccionado) -->
+              <div v-if="grupoSeleccionado" class="control-group">
+                <h3>Acciones de Grupo</h3>
+                <div class="button-group">
+                  <button
+                    class="badge separar"
+                    @click="separarGrupoSeleccionado"
+                  >
+                    <span>✂️</span> Separar grupo
+                  </button>
                 </div>
               </div>
             </div>
@@ -110,7 +196,11 @@
 
           <div class="map-container">
             <!-- Modal de instrucciones -->
-            <div v-if="showInstructions" class="modal" @click.self="showInstructions = false">
+            <div
+              v-if="showInstructions"
+              class="modal"
+              @click.self="showInstructions = false"
+            >
               <div class="modal-content">
                 <button class="modal-close" @click="showInstructions = false">
                   <i class="fas fa-times"></i>
@@ -118,8 +208,8 @@
                 <h2>Instrucciones de Uso</h2>
                 <div class="instructions">
                   <p>
-                    <span class="highlight">Para cambiar estado:</span> Seleccione
-                    UNA mesa y luego elija un estado
+                    <span class="highlight">Para cambiar estado:</span>
+                    Seleccione UNA mesa y luego elija un estado
                   </p>
                   <p>
                     <span class="highlight">Para unir mesas:</span> Arrastre una
@@ -130,9 +220,348 @@
                     grupo y luego en el botón "Separar"
                   </p>
                   <p>
-                    <span class="highlight">Para mover:</span> Arrastre una mesa o
-                    grupo a la posición deseada
+                    <span class="highlight">Para mover:</span> Arrastre una mesa
+                    o grupo a la posición deseada
                   </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal de añadir nueva mesa -->
+            <div
+              v-if="showAddModal"
+              class="modal"
+              @click.self="showAddModal = false"
+            >
+              <div class="modal-content">
+                <button class="modal-close" @click="showAddModal = false">
+                  <i class="fas fa-times"></i>
+                </button>
+                <h2><i class="fas fa-plus-circle"></i> Añadir Nueva Mesa</h2>
+
+                <div class="form-group">
+                  <label>
+                    <i class="fas fa-hashtag"></i> Número de Mesa *
+                  </label>
+                  <div class="number-control">
+                    <button
+                      class="number-btn"
+                      @click="nuevaMesa.id = Math.max(1, nuevaMesa.id - 1)"
+                    >
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <input
+                      type="number"
+                      v-model.number="nuevaMesa.id"
+                      min="1"
+                      max="999"
+                      required
+                      readonly
+                    />
+                    <button
+                      class="number-btn"
+                      @click="nuevaMesa.id = nuevaMesa.id + 1"
+                    >
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                  <div v-if="errores.id" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i> {{ errores.id }}
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label> <i class="fas fa-users"></i> Capacidad * </label>
+                  <div class="number-control">
+                    <button
+                      class="number-btn"
+                      @click="nuevaMesa.capacidad = Math.max(2, nuevaMesa.capacidad - 1)"
+                    >
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <input
+                      type="number"
+                      v-model.number="nuevaMesa.capacidad"
+                      min="2"
+                      max="20"
+                      required
+                      readonly
+                    />
+                    <button
+                      class="number-btn"
+                      @click="nuevaMesa.capacidad = Math.min(20, nuevaMesa.capacidad + 1)"
+                    >
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                  <div v-if="errores.capacidad" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i> {{
+                    errores.capacidad }}
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="mesa-forma">
+                    <i class="fas fa-shapes"></i> Forma
+                  </label>
+                  <div class="select-wrapper">
+                    <select id="mesa-forma" v-model="nuevaMesa.forma">
+                      <option value="cuadrada">Cuadrada</option>
+                      <option value="redonda">Redonda</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label
+                    ><i class="fas fa-ruler-combined"></i> Tamaño (en
+                    cuadrículas)</label
+                  >
+                  <div class="size-controls">
+                    <div class="dimension-control">
+                      <label>Ancho</label>
+                      <div class="number-control">
+                        <button
+                          class="number-btn"
+                          @click="nuevaMesa.anchoCuadriculas = Math.max(3, nuevaMesa.anchoCuadriculas - 1)"
+                        >
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <input
+                          type="number"
+                          v-model.number="nuevaMesa.anchoCuadriculas"
+                          min="3"
+                          max="6"
+                          required
+                          readonly
+                        />
+                        <button
+                          class="number-btn"
+                          @click="nuevaMesa.anchoCuadriculas = Math.min(6, nuevaMesa.anchoCuadriculas + 1)"
+                        >
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="dimension-control">
+                      <label>Alto</label>
+                      <div class="number-control">
+                        <button
+                          class="number-btn"
+                          @click="nuevaMesa.altoCuadriculas = Math.max(3, nuevaMesa.altoCuadriculas - 1)"
+                        >
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <input
+                          type="number"
+                          v-model.number="nuevaMesa.altoCuadriculas"
+                          min="3"
+                          max="6"
+                          required
+                          readonly
+                        />
+                        <button
+                          class="number-btn"
+                          @click="nuevaMesa.altoCuadriculas = Math.min(6, nuevaMesa.altoCuadriculas + 1)"
+                        >
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="size-preview">
+                    <div class="preview-label">Vista previa:</div>
+                    <div
+                      class="mesa-preview"
+                      :class="nuevaMesa.forma"
+                      :style="{
+                        width: (nuevaMesa.anchoCuadriculas * 20) + 'px',
+                        height: (nuevaMesa.altoCuadriculas * 20) + 'px'
+                      }"
+                    ></div>
+                    <div class="size-indicator">
+                      {{ nuevaMesa.anchoCuadriculas }}×{{
+                      nuevaMesa.altoCuadriculas }} cuadrículas ({{
+                      nuevaMesa.anchoCuadriculas * 50 }}×{{
+                      nuevaMesa.altoCuadriculas * 50 }}px)
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button
+                    type="button"
+                    class="btn-cancel"
+                    @click="showAddModal = false"
+                  >
+                    <i class="fas fa-times"></i> Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-confirm"
+                    @click="confirmarNuevaMesa"
+                  >
+                    <i class="fas fa-check"></i> Crear Mesa
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal de edición de mesa -->
+            <div
+              v-if="showMesaMenu"
+              class="modal"
+              @click.self="showMesaMenu = false"
+            >
+              <div class="modal-content">
+                <button class="modal-close" @click="showMesaMenu = false">
+                  <i class="fas fa-times"></i>
+                </button>
+                <h2>Editar Mesa {{ mesaEditada.id }}</h2>
+
+                <div class="form-group">
+                  <label for="edit-mesa-estado">Estado</label>
+                  <select id="edit-mesa-estado" v-model="mesaEditada.estado">
+                    <option value="disponible">Disponible</option>
+                    <option value="ocupada">Ocupada</option>
+                    <option value="reservada">Reservada</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="edit-mesa-capacidad">Capacidad *</label>
+                  <div class="number-control">
+                    <button
+                      class="number-btn"
+                      @click="mesaEditada.capacidad = Math.max(2, mesaEditada.capacidad - 1)"
+                    >
+                      <i class="fas fa-minus"></i>
+                    </button>
+                    <input
+                      type="number"
+                      v-model.number="mesaEditada.capacidad"
+                      min="2"
+                      max="20"
+                      required
+                      readonly
+                    />
+                    <button
+                      class="number-btn"
+                      @click="mesaEditada.capacidad = Math.min(20, mesaEditada.capacidad + 1)"
+                    >
+                      <i class="fas fa-plus"></i>
+                    </button>
+                  </div>
+                  <div v-if="erroresEdit.capacidad" class="error-message">
+                    {{ erroresEdit.capacidad }}
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="edit-mesa-forma">Forma de la mesa</label>
+                  <select id="edit-mesa-forma" v-model="mesaEditada.forma">
+                    <option value="cuadrada">Cuadrada</option>
+                    <option value="redonda">Redonda</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label
+                    ><i class="fas fa-ruler-combined"></i> Tamaño (en
+                    cuadrículas)</label
+                  >
+                  <div class="size-controls">
+                    <div class="dimension-control">
+                      <label>Ancho</label>
+                      <div class="number-control">
+                        <button
+                          class="number-btn"
+                          @click="mesaEditada.anchoCuadriculas = Math.max(3, mesaEditada.anchoCuadriculas - 1)"
+                        >
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <input
+                          type="number"
+                          v-model.number="mesaEditada.anchoCuadriculas"
+                          min="3"
+                          max="6"
+                          required
+                          readonly
+                        />
+                        <button
+                          class="number-btn"
+                          @click="mesaEditada.anchoCuadriculas = Math.min(6, mesaEditada.anchoCuadriculas + 1)"
+                        >
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="dimension-control">
+                      <label>Alto</label>
+                      <div class="number-control">
+                        <button
+                          class="number-btn"
+                          @click="mesaEditada.altoCuadriculas = Math.max(3, mesaEditada.altoCuadriculas - 1)"
+                        >
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <input
+                          type="number"
+                          v-model.number="mesaEditada.altoCuadriculas"
+                          min="3"
+                          max="6"
+                          required
+                          readonly
+                        />
+                        <button
+                          class="number-btn"
+                          @click="mesaEditada.altoCuadriculas = Math.min(6, mesaEditada.altoCuadriculas + 1)"
+                        >
+                          <i class="fas fa-plus"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Vista previa agregada -->
+                  <div class="size-preview">
+                    <div class="preview-label">Vista previa:</div>
+                    <div
+                      class="mesa-preview"
+                      :class="mesaEditada.forma"
+                      :style="{
+                        width: (mesaEditada.anchoCuadriculas * 20) + 'px',
+                        height: (mesaEditada.altoCuadriculas * 20) + 'px'
+                      }"
+                    ></div>
+                    <div class="size-indicator">
+                      {{ mesaEditada.anchoCuadriculas }}×{{
+                      mesaEditada.altoCuadriculas }} cuadrículas ({{
+                      mesaEditada.anchoCuadriculas * 50 }}×{{
+                      mesaEditada.altoCuadriculas * 50 }}px)
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button
+                    type="button"
+                    class="btn-cancel"
+                    @click="showMesaMenu = false"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-confirm"
+                    @click="guardarCambiosMesa"
+                  >
+                    Guardar Cambios
+                  </button>
                 </div>
               </div>
             </div>
@@ -140,10 +569,12 @@
             <div
               class="restaurant-map"
               @mousemove="handleDragMove"
-              @mouseup="handleStopDrag"
+              @mouseup="handleDrop"
               @mouseleave="handleStopDrag"
             >
-              <div v-for="elemento in elementosDecorativos" :key="elemento.id"
+              <div
+                v-for="elemento in elementosDecorativos"
+                :key="elemento.id"
                 class="layout-elemento"
                 :class="[elemento.tipo]"
                 :style="{ 
@@ -151,9 +582,9 @@
                   width: elemento.width + 'px', height: elemento.height + 'px',
                   transform: 'rotate(' + (elemento.rotacion || 0) + 'deg)',
                   backgroundColor: elemento.color 
-                }">
-              </div>
-              
+                }"
+              ></div>
+
               <div class="map-boundary"></div>
 
               <div
@@ -206,11 +637,13 @@
                 :style="{
                   backgroundColor: obtenerColor(mesa.estado),
                   left: mesa.x + 'px',
-                  top: mesa.y + 'px'
+                  top: mesa.y + 'px',
+                  width: (mesa.anchoCuadriculas * 50) + 'px',
+                  height: (mesa.altoCuadriculas * 50) + 'px'
                 }"
                 @mousedown="handleStartDrag($event, mesa, 'mesa')"
                 @mousemove="handleDragMove"
-                @mouseup="handleDropWrapper($event, mesa)"
+                @mouseup="handleDrop"
                 @click.exact="seleccionarMesaIndividual(mesa.id)"
               >
                 <h3>Mesa {{ mesa.id }}</h3>

@@ -6,13 +6,20 @@ export function startDrag(
   dragStartPos,
   dragPosition
 ) {
-  event.preventDefault();
-  draggingItem.value = { ...item, type };
-  dragStartPos.x = event.clientX;
-  dragStartPos.y = event.clientY;
-  dragPosition.x = item.x;
-  dragPosition.y = item.y;
-  document.body.style.cursor = "grabbing";
+  try {
+    event.preventDefault();
+    draggingItem.value = { ...item, type };
+    dragStartPos.x = event.clientX;
+    dragStartPos.y = event.clientY;
+    dragPosition.x = item.x;
+    dragPosition.y = item.y;
+    document.body.style.cursor = "grabbing";
+  } catch (error) {
+    console.error("Error al iniciar el arrastre:", error);
+    // Resetear el estado de arrastre en caso de error
+    draggingItem.value = null;
+    document.body.style.cursor = "";
+  }
 }
 
 export function onDragMove(
@@ -31,20 +38,41 @@ export function onDragMove(
   const dx = event.clientX - dragStartPos.x;
   const dy = event.clientY - dragStartPos.y;
 
-  let newX = draggingItem.value.x + dx;
-  let newY = draggingItem.value.y + dy;
+  // Posición sin ajustar
+  let rawX = draggingItem.value.x + dx;
+  let rawY = draggingItem.value.y + dy;
 
-  const buffer =
-    draggingItem.value.type === "mesa"
-      ? { x: 150, y: 110 }
-      : { x: 200, y: 250 };
+  // Tamaño de la celda de la cuadrícula
+  const gridSize = 50;
 
-  newX = Math.max(0, Math.min(mapWidth - buffer.x, newX));
-  newY = Math.max(0, Math.min(mapHeight - buffer.y, newY));
+  // Ajustar a la cuadrícula
+  let newX = Math.round(rawX / gridSize) * gridSize;
+  let newY = Math.round(rawY / gridSize) * gridSize;
+
+  // Usar tamaño personalizado si existe
+  let width, height;
+
+  if (draggingItem.value.type === "mesa") {
+    const mesa = mesasIndividuales.value.find(
+      (m) => m.id === draggingItem.value.id
+    );
+    if (mesa) {
+      width = mesa.anchoCuadriculas * gridSize || 100;
+      height = mesa.altoCuadriculas * gridSize || 100;
+    }
+  } else if (draggingItem.value.type === "grupo") {
+    width = 200;
+    height = 250;
+  }
+
+  // Asegurar que la mesa se mantiene dentro del mapa
+  newX = Math.max(0, Math.min(mapWidth - width, newX));
+  newY = Math.max(0, Math.min(mapHeight - height, newY));
 
   dragPosition.x = newX;
   dragPosition.y = newY;
 
+  // Actualizar la posición del elemento arrastrado
   if (draggingItem.value.type === "mesa") {
     const mesa = mesasIndividuales.value.find(
       (m) => m.id === draggingItem.value.id
@@ -61,33 +89,38 @@ export function onDragMove(
     }
   }
 
+  // Lógica de detección de drop target
   dropTarget.value = null;
+  const currentDraggedItem = draggingItem.value;
+  const draggedWidth = width;
+  const draggedHeight = height;
+
+  // Detección de mesas
+  const targetMesa = mesasIndividuales.value.find((mesa) => {
+    if (mesa.id === currentDraggedItem.id) return false;
+
+    return (
+      Math.abs(mesa.x - newX) <
+        (mesa.anchoCuadriculas * 50 + draggedWidth) / 2 &&
+      Math.abs(mesa.y - newY) < (mesa.altoCuadriculas * 50 + draggedHeight) / 2
+    );
+  });
+
+  if (targetMesa) {
+    dropTarget.value = targetMesa.id;
+  }
+
+  // Lógica de detección de drop target (GRUPOS)
   dropTargetGroup.value = null;
+  const targetGrupo = grupos.value.find((grupo) => {
+    return (
+      Math.abs(grupo.x - newX) < (200 + draggedWidth) / 2 &&
+      Math.abs(grupo.y - newY) < (280 + draggedHeight) / 2
+    );
+  });
 
-  if (draggingItem.value.type === "mesa") {
-    const currentDraggedItemX = newX;
-    const currentDraggedItemY = newY;
-
-    const targetMesa = mesasIndividuales.value.find((mesa) => {
-      if (mesa.id === draggingItem.value.id) return false;
-      const distX = Math.abs(mesa.x - currentDraggedItemX);
-      const distY = Math.abs(mesa.y - currentDraggedItemY);
-      return distX < 150 && distY < 110;
-    });
-
-    if (targetMesa) {
-      dropTarget.value = targetMesa.id;
-    }
-
-    const targetGrupo = grupos.value.find((grupo) => {
-      const distX = Math.abs(grupo.x - currentDraggedItemX);
-      const distY = Math.abs(grupo.y - currentDraggedItemY);
-      return distX < 150 && distY < 100;
-    });
-
-    if (targetGrupo) {
-      dropTargetGroup.value = targetGrupo.id;
-    }
+  if (targetGrupo) {
+    dropTargetGroup.value = targetGrupo.id;
   }
 }
 
@@ -134,17 +167,16 @@ export function handleDrop(
           showUnionFeedback
         );
       }
-    }
-    else if (dropTarget.value) {
+    } else if (dropTarget.value) {
       const mesaDestino = mesasIndividuales.value.find(
         (m) => m.id === dropTarget.value
       );
       if (mesaDestino && mesaDestino.id !== mesaOrigen.id) {
         unirMesas(
-          mesaOrigen, 
-          mesaDestino, 
-          mesasIndividuales, 
-          grupos, 
+          mesaOrigen,
+          mesaDestino,
+          mesasIndividuales,
+          grupos,
           showUnionFeedback
         );
       }

@@ -61,7 +61,7 @@ body {
   flex-direction: column;
   overflow-y: auto;
   z-index: 10;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   border-radius: 0 0 0 10px;
 }
 
@@ -111,7 +111,7 @@ body {
   background: white;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .control-group h3 {
@@ -190,7 +190,8 @@ body {
   gap: 10px;
 }
 
-.status-info, .selection-info {
+.status-info,
+.selection-info {
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -223,11 +224,13 @@ body {
   margin-top: 2px;
 }
 
-.status-info div, .selection-info div {
+.status-info div,
+.selection-info div {
   flex: 1;
 }
 
-.status-info strong, .selection-info strong {
+.status-info strong,
+.selection-info strong {
   display: block;
   margin-bottom: 4px;
 }
@@ -239,7 +242,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -252,7 +255,7 @@ body {
   padding: 30px;
   max-width: 600px;
   width: 90%;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
@@ -293,7 +296,6 @@ body {
   color: #e74c3c;
   font-weight: bold;
   display: inline-block;
-  min-width: 140px;
 }
 
 .map-container {
@@ -326,13 +328,13 @@ body {
   user-select: none;
 }
 .layout-elemento.pared {
-  background-color: #A9A9A9;
+  background-color: #a9a9a9;
 }
 .layout-elemento.barra {
-  background-color: #8B4513;
+  background-color: #8b4513;
 }
 .layout-elemento.planta {
-  background-color: #228B22;
+  background-color: #228b22;
   width: 50px !important;
   height: 50px !important;
   border-radius: 50%;
@@ -636,4 +638,227 @@ body {
   width: 100px;
   height: 100px;
   border-radius: 5px;
+}
+.modal-content form,
+.modal-content .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-cancel {
+  background: #e0e0e0;
+  color: #333;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.btn-cancel:hover {
+  background: #d0d0d0;
+}
+
+.btn-confirm {
+  background: #2ecc71;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.btn-confirm:hover {
+  background: #27ae60;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.size-indicator {
+  text-align: center;
+  font-weight: bold;
+  color: #3498db;
+  margin-top: 5px;
+}
+.grid-size-controls {
+  margin-bottom: 15px;
+}
+
+.grid-dimensions {
+  display: flex;
+  gap: 15px;
+  margin-top: 5px;
+}
+
+.dimension-control {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dimension-control input {
+  width: 60px;
+  text-align: center;
+}
+
+.size-indicator {
+  margin-top: 5px;
+  font-size: 0.9em;
+  color: #666;
+}
+/* Mejoras para el modal de añadir mesa */
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  appearance: none;
+  width: 100%;
+  padding: 12px 15px;
+}
+
+.select-wrapper i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.size-controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 8px;
+}
+
+.dimension-control {
+  flex: 1;
+}
+
+.input-with-buttons {
+  display: flex;
+  margin-top: 5px;
+}
+
+.input-with-buttons button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ddd;
+  background: #f8f9fa;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-with-buttons input {
+  width: 60px;
+  text-align: center;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+
+.size-preview {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.preview-label {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.mesa-preview {
+  margin: 0 auto;
+  background: #3498db;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.mesa-preview.cuadrada {
+  border-radius: 5px;
+}
+
+.mesa-preview.redonda {
+  border-radius: 50%;
+}
+
+.size-indicator {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.error-message i {
+  margin-right: 5px;
+}
+
+.btn-editar-mesa {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.btn-editar-mesa:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.btn-editar-mesa i {
+  font-size: 1rem;
 }

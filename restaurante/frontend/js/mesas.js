@@ -31,40 +31,74 @@ export function unirMesas(
   mesa2,
   mesasIndividuales,
   grupos,
-  showUnionFeedback
+  showUnionFeedback,
+  mesasSeleccionadas
 ) {
-  if (
-    mesa1.estado !== ESTADOS_MESA.DISPONIBLE ||
-    mesa2.estado !== ESTADOS_MESA.DISPONIBLE
-  ) {
-    alert("Solo se pueden unir mesas disponibles");
+  try {
+    if (
+      mesa1.estado !== ESTADOS_MESA.DISPONIBLE ||
+      mesa2.estado !== ESTADOS_MESA.DISPONIBLE
+    ) {
+      alert("Solo se pueden unir mesas disponibles");
+      return false;
+    }
+
+    const grupoId = "G" + Date.now().toString().slice(-3);
+    const x = (mesa1.x + mesa2.x) / 2;
+    const y = (mesa1.y + mesa2.y) / 2;
+
+    const anchoTotal = Math.min(
+      mesa1.anchoCuadriculas + mesa2.anchoCuadriculas,
+      10
+    );
+    const altoTotal = Math.min(
+      mesa1.altoCuadriculas + mesa2.altoCuadriculas,
+      10
+    );
+
+    // Se crea el grupo con toda la información necesaria (incluyendo tamaño y forma)
+    grupos.value.push({
+      id: grupoId,
+      mesas: [
+        {
+          id: mesa1.id,
+          capacidad: mesa1.capacidad,
+          anchoCuadriculas: mesa1.anchoCuadriculas,
+          altoCuadriculas: mesa1.altoCuadriculas,
+          forma: mesa1.forma,
+        },
+        {
+          id: mesa2.id,
+          capacidad: mesa2.capacidad,
+          anchoCuadriculas: mesa2.anchoCuadriculas,
+          altoCuadriculas: mesa2.altoCuadriculas,
+          forma: mesa2.forma,
+        },
+      ],
+      capacidadTotal: mesa1.capacidad + mesa2.capacidad,
+      estado: mesa1.estado,
+      x: x,
+      y: y,
+      anchoCuadriculas: anchoTotal,
+      altoCuadriculas: altoTotal,
+    });
+
+    mesasIndividuales.value = mesasIndividuales.value.filter(
+      (mesa) => mesa.id !== mesa1.id && mesa.id !== mesa2.id
+    );
+
+    showUnionFeedback.value = true;
+    setTimeout(() => (showUnionFeedback.value = false), 1200);
+    mesasSeleccionadas.value = [];
+
+    return true;
+  } catch (error) {
+    console.error("Error al unir mesas:", error);
+    alert(
+      "Ocurrió un error al intentar unir las mesas. Por favor, inténtalo de nuevo."
+    );
     return false;
   }
-
-  const grupoId = "G" + Date.now().toString().slice(-3);
-  const x = (mesa1.x + mesa2.x) / 2;
-  const y = (mesa1.y + mesa2.y) / 2;
-
-  grupos.value.push({
-    id: grupoId,
-    mesas: [
-      { id: mesa1.id, capacidad: mesa1.capacidad },
-      { id: mesa2.id, capacidad: mesa2.capacidad },
-    ],
-    capacidadTotal: mesa1.capacidad + mesa2.capacidad,
-    estado: mesa1.estado,
-    x: x,
-    y: y,
-    width: 200,
-    height: 250,
-  });
-
-  mesasIndividuales.value = mesasIndividuales.value.filter(
-    (mesa) => mesa.id !== mesa1.id && mesa.id !== mesa2.id
-  );
-
-  showUnionFeedback.value = true;
-  setTimeout(() => (showUnionFeedback.value = false), 1200);
 }
 
 export function separarGrupoSeleccionado(
@@ -84,6 +118,10 @@ export function separarGrupoSeleccionado(
       id: mesaData.id,
       estado: grupo.estado,
       capacidad: mesaData.capacidad,
+      forma: mesaData.forma,
+      // Propiedades de tamaño corregidas
+      anchoCuadriculas: mesaData.anchoCuadriculas,
+      altoCuadriculas: mesaData.altoCuadriculas,
       x: Math.max(
         0,
         Math.min(mapWidth - 90, grupo.x + Math.cos(anguloRad) * radio)
@@ -103,22 +141,31 @@ export function unirMesaAGrupo(
   grupo,
   mesasIndividuales,
   grupos,
-  showUnionFeedback
+  showUnionFeedback,
+  mesasSeleccionadas
 ) {
   if (mesa.estado !== ESTADOS_MESA.DISPONIBLE) {
     alert("Solo se pueden unir mesas disponibles a un grupo");
     return;
   }
-  
-  grupo.mesas.push({ id: mesa.id, capacidad: mesa.capacidad });
+
+  // Clonar la mesa antes de agregarla al grupo
+  const mesaClonada = {
+    ...mesa,
+    grupoId: grupo.id,
+  };
+
+  grupo.mesas.push(mesaClonada);
   grupo.capacidadTotal += mesa.capacidad;
 
   mesasIndividuales.value = mesasIndividuales.value.filter(
     (m) => m.id !== mesa.id
   );
-  
+
   showUnionFeedback.value = true;
   setTimeout(() => (showUnionFeedback.value = false), 2000);
+
+  mesasSeleccionadas.value = [];
 
   return true;
 }
