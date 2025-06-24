@@ -9,7 +9,7 @@ export default function useDragDrop() {
   const dropTarget = ref(null);
   const dropTargetGroup = ref(null);
   const showUnionFeedback = ref(false);
-  const mapWidth = 1155;
+  const mapWidth = 1175;
   const mapHeight = 895;
 
   const startDrag = (event, item, type) => {

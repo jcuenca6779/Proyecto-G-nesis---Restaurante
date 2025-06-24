@@ -30,6 +30,7 @@ export default {
   /* Hacemos que el contenido sea desplazable si excede la altura */
   max-height: 70vh;
   overflow-y: auto;
+  margin-top: 30px;
   padding-right: 15px; /* Espacio para la barra de scroll */
 }
 

@@ -11,10 +11,7 @@ const crearPiso = (id, nombre) => ({
   ] : [],
   grupos: [],
   elementosDecorativos: id === 1 ? [
-    { id: 'p1', tipo: 'pared', x: 0, y: 0, width: 1290, height: 20, color: '#a9a9a9' },
-    { id: 'p2', tipo: 'pared', x: 0, y: 875, width: 1290, height: 20, color: '#a9a9a9' },
-    { id: 'p3', tipo: 'pared', x: 0, y: 0, width: 20, height: 895, color: '#a9a9a9' },
-    { id: 'p4', tipo: 'pared', x: 1270, y: 0, width: 20, height: 895, color: '#a9a9a9' }
+    
   ] : [],
   mesasSeleccionadas: [],
   grupoSeleccionado: null,
@@ -40,6 +37,10 @@ export default {
   },
 
   mutations: {
+    // === NUEVA MUTACIÓN ===
+    DELETE_PISO(state, pisoId) {
+        state.pisos = state.pisos.filter(p => p.id !== pisoId);
+    },
     SET_PISO_ACTIVO(state, pisoId) { state.pisoActivoId = pisoId; },
     ADD_PISO(state, nuevoPiso) { state.pisos.push(nuevoPiso); },
     SET_SELECTED_MESAS(state, ids) {
@@ -94,6 +95,23 @@ export default {
   },
 
   actions: {
+    eliminarPiso({ commit, state }, pisoId) {
+        // === LÓGICA DE PROTECCIÓN AÑADIDA ===
+        if (pisoId === 1) {
+            alert('El Piso 1 es el principal y no se puede eliminar.');
+            return; // Detiene la ejecución de la acción
+        }
+        if (state.pisos.length <= 1) {
+            alert('No se puede eliminar el único piso existente.');
+            return;
+        }
+        if (confirm(`¿Está seguro de que desea eliminar el ${state.pisos.find(p=>p.id === pisoId)?.nombre}? Esta acción es irreversible.`)) {
+            commit('DELETE_PISO', pisoId);
+            if (state.pisoActivoId === pisoId) {
+                commit('SET_PISO_ACTIVO', state.pisos[0]?.id || null);
+            }
+        }
+    },
     cambiarPiso({ commit }, pisoId) {
       commit('SET_PISO_ACTIVO', pisoId);
       commit('SET_SELECTED_MESAS', []);
@@ -116,7 +134,6 @@ export default {
         commit('UPDATE_MESA', { pisoId: state.pisoActivoId, mesaActualizada });
     },
     unirMesas({ commit, state }, { mesa1, mesa2, showUnionFeedback }) {
-        // === CORRECCIÓN 1: Validación de estado de las mesas ===
         if (mesa1.estado !== ESTADOS_MESA.DISPONIBLE || mesa2.estado !== ESTADOS_MESA.DISPONIBLE) {
             alert('Solo se pueden unir mesas que estén disponibles.');
             return;
@@ -127,7 +144,6 @@ export default {
             id: generarId('grupo'),
             mesas: [mesa1, mesa2],
             capacidadTotal: mesa1.capacidad + mesa2.capacidad,
-            // === CORRECCIÓN 2: El estado inicial del grupo ahora es 'ocupado' ===
             estado: ESTADOS_MESA.OCUPADA, 
             x: (mesa1.x + mesa2.x) / 2,
             y: (mesa1.y + mesa2.y) / 2,
@@ -145,7 +161,6 @@ export default {
         }
     },
     unirMesaAGrupo({ commit, state, getters }, { mesa, grupo, showUnionFeedback }) {
-        // === CORRECCIÓN 1: Validación de estado de la mesa a unir ===
         if (mesa.estado !== ESTADOS_MESA.DISPONIBLE) {
             alert('Solo se pueden unir mesas que estén disponibles.');
             return;

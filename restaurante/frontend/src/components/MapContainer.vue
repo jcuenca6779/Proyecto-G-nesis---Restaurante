@@ -190,13 +190,14 @@ export default {
 
 .restaurant-map {
   position: relative;
-  width: 1295px;
+  width: 1180px;
   height: 900px;
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f8ff"/><path d="M0 50 L100 50 M50 0 L50 100" stroke="%23d0e0e0" stroke-width="0.5"/></svg>');
   background-size: 50px 50px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   user-select: none;
+  border: #3498db 3px solid;
 }
 
 /* El resto de los estilos de mesas, grupos, etc. se mantienen igual */

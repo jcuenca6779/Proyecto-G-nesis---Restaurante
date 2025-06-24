@@ -25,7 +25,6 @@ import StatsPanel from '@/components/StatsPanel.vue';
 import Modal from '@/components/Modal.vue';
 import EditMesaForm from '@/components/EditMesaForm.vue';
 import AddMesaForm from '@/components/AddMesaForm.vue';
-// IMPORTAMOS EL NUEVO COMPONENTE
 import InstructionsModal from '@/components/InstructionsModal.vue';
 
 export default {
@@ -38,7 +37,6 @@ export default {
     EditMesaForm,
     AddMesaForm,
     Modal,
-    // REGISTRAMOS EL NUEVO COMPONENTE
     InstructionsModal
   },
   setup() {
@@ -69,9 +67,8 @@ export default {
 
 .main-content {
   flex: 1;
-  
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 300px 1fr;
   grid-template-rows: 1fr auto;
 }
 
