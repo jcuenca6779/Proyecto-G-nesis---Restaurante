@@ -14,6 +14,18 @@
           <button class="badge add" @click="agregarMesaNueva">
             ➕ Añadir Mesa
           </button>
+          
+          <!-- BOTÓN NUEVO PARA TOMAR PEDIDO -->
+          <button 
+            class="badge tomar-pedido"
+            v-if="mesasSeleccionadas.length === 1"
+            :disabled="!sePuedeTomarPedido"
+            @click="abrirModalPedido"
+            title="Solo para mesas disponibles"
+          >
+            📋 Tomar Pedido
+          </button>
+          
           <button
             class="badge delete"
             @click="eliminarMesaSeleccionada"
@@ -24,6 +36,7 @@
         </div>
       </div>
 
+      <!-- SECCIÓN DE INFORMACIÓN DE LA MESA SELECCIONADA -->
       <div v-if="mesasSeleccionadas.length > 0" class="info-section">
         <div class="selection-info">
           ✅
@@ -41,6 +54,7 @@
         </div>
       </div>
 
+      <!-- SECCIÓN DE ACCIONES DEL GRUPO SELECCIONADO -->
       <div v-if="grupoSeleccionado" class="control-group">
         <h3>Acciones de Grupo</h3>
         <div class="button-group">
@@ -72,8 +86,28 @@ export default {
     } = useMesaManagement();
     const { separarGrupoSeleccionado } = useGroupManagement();
 
+    // Propiedades computadas que leen del store de 'pisos'
     const mesasSeleccionadas = computed(() => store.getters['pisos/mesasSeleccionadas']);
     const grupoSeleccionado = computed(() => store.getters['pisos/grupoSeleccionado']);
+
+    // Obtiene el objeto completo de la mesa seleccionada para verificar su estado
+    const mesaSeleccionada = computed(() => {
+        if (mesasSeleccionadas.value.length === 1) {
+            return store.getters['pisos/mesaById'](mesasSeleccionadas.value[0]);
+        }
+        return null;
+    });
+
+    // Determina si el botón "Tomar Pedido" debe estar activo
+    const sePuedeTomarPedido = computed(() => {
+        return mesaSeleccionada.value && mesaSeleccionada.value.estado === 'disponible';
+    });
+
+    // Abre el modal para tomar el pedido
+    const abrirModalPedido = () => {
+        store.commit('modal/SET_TYPE', 'tomarPedido');
+        store.commit('modal/SET_SHOW', true);
+    };
 
     const toggleInstructions = () => {
       store.commit('modal/SET_TYPE', 'instructions');
@@ -83,11 +117,13 @@ export default {
     return {
       mesasSeleccionadas,
       grupoSeleccionado,
+      sePuedeTomarPedido,
       agregarMesaNueva,
       eliminarMesaSeleccionada,
       abrirMenuMesa,
       separarGrupoSeleccionado,
-      toggleInstructions
+      toggleInstructions,
+      abrirModalPedido
     };
   }
 };
@@ -111,5 +147,8 @@ export default {
 .btn-editar-mesa:hover {
   background: #2980b9;
   transform: translateY(-2px);
+}
+.badge.tomar-pedido {
+  background: linear-gradient(to bottom, #3498db, #2980b9);
 }
 </style>

@@ -628,3 +628,7 @@ body {
   border-radius: 5px;
   text-align: center;
 }
+
+.badge.tomar-pedido {
+  background: linear-gradient(to bottom, #3498db, #2980b9);
+}

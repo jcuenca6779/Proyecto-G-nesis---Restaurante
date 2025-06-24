@@ -5,9 +5,9 @@ const crearPiso = (id, nombre) => ({
   id,
   nombre,
   mesas: id === 1 ? [
-    { id: 1, capacidad: 4, estado: 'disponible', forma: 'cuadrada', anchoCuadriculas: 3, altoCuadriculas: 3, x: 50, y: 50 },
-    { id: 2, capacidad: 2, estado: 'ocupada', forma: 'redonda', anchoCuadriculas: 2, altoCuadriculas: 2, x: 200, y: 50 },
-    { id: 3, capacidad: 6, estado: 'reservada', forma: 'rectangular', anchoCuadriculas: 4, altoCuadriculas: 2, x: 350, y: 50 }
+    { id: 1, capacidad: 4, estado: 'disponible', forma: 'cuadrada', anchoCuadriculas: 3, altoCuadriculas: 3, x: 50, y: 50, pedidoId: null },
+    { id: 2, capacidad: 2, estado: 'ocupada', forma: 'redonda', anchoCuadriculas: 2, altoCuadriculas: 2, x: 200, y: 50, pedidoId: null },
+    { id: 3, capacidad: 6, estado: 'reservada', forma: 'rectangular', anchoCuadriculas: 4, altoCuadriculas: 2, x: 350, y: 50, pedidoId: null }
   ] : [],
   grupos: [],
   elementosDecorativos: id === 1 ? [
@@ -89,6 +89,17 @@ export default {
         if (piso) {
             const index = piso.grupos.findIndex(g => g.id === grupoActualizado.id);
             if (index !== -1) piso.grupos[index] = grupoActualizado;
+        }
+    },
+    ASIGNAR_PEDIDO_A_MESA(state, { pisoId, mesaId, pedidoId }) {
+        const piso = state.pisos.find(p => p.id === pisoId);
+        if (piso) {
+            const mesa = piso.mesas.find(m => m.id === mesaId);
+            if (mesa) {
+                mesa.pedidoId = pedidoId;
+                // Al asignar un pedido, la mesa pasa a estar ocupada
+                mesa.estado = 'ocupada';
+            }
         }
     },
     SET_EDITED_MESA(state, mesa) { state.mesaEditada = mesa; },

@@ -11,6 +11,7 @@
       <EditMesaForm v-if="modalType === 'editMesa'" />
       <AddMesaForm v-if="modalType === 'addMesa'" />
       <InstructionsModal v-if="modalType === 'instructions'" />
+      <TomarPedidoForm v-if="modalType === 'tomarPedido'" />
     </Modal>
   </div>
 </template>
@@ -26,6 +27,8 @@ import Modal from '@/components/Modal.vue';
 import EditMesaForm from '@/components/EditMesaForm.vue';
 import AddMesaForm from '@/components/AddMesaForm.vue';
 import InstructionsModal from '@/components/InstructionsModal.vue';
+import TomarPedidoForm from '@/components/TomarPedidoForm.vue'; // <-- IMPORTAR
+
 
 export default {
   name: 'App',
@@ -37,7 +40,8 @@ export default {
     EditMesaForm,
     AddMesaForm,
     Modal,
-    InstructionsModal
+    InstructionsModal,
+    TomarPedidoForm
   },
   setup() {
     const store = useStore();

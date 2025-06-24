@@ -13,7 +13,6 @@
         @mouseup="handleDrop"
         @mouseleave="handleStopDrag"
       >
-        <!-- Elementos decorativos del piso activo -->
         <div
           v-for="elemento in elementosDecorativos"
           :key="elemento.id"
@@ -30,7 +29,6 @@
 
         <div class="map-boundary"></div>
 
-        <!-- Silueta de arrastre -->
         <div
           v-if="draggingItem"
           class="drag-indicator"
@@ -52,7 +50,6 @@
           ¡Mesas unidas con éxito!
         </div>
 
-        <!-- Grupos del piso activo -->
         <div
           v-for="(grupo, index) in grupos"
           :key="grupo.id"
@@ -77,7 +74,6 @@
           </div>
         </div>
 
-        <!-- Mesas individuales del piso activo -->
         <div
           v-for="mesa in mesasIndividuales"
           :key="mesa.id"
@@ -100,6 +96,11 @@
           <h3>Mesa {{ mesa.id }}</h3>
           <p>Cap: {{ mesa.capacidad }}</p>
           <p>Estado: {{ mesa.estado }}</p>
+
+          <!-- INSIGNIA CON EL NÚMERO DE PEDIDO -->
+          <div v-if="mesa.pedidoId" class="pedido-id-badge" title="Número de Pedido">
+            #{{ mesa.pedidoId.slice(-6) }}
+          </div>
         </div>
       </div>
     </div>
@@ -113,14 +114,13 @@ import useDragDrop from '@/composables/useDragDrop';
 import { obtenerColor } from '@/utils/helpers';
 import useMesaManagement from '@/composables/useMesaManagement';
 import useGroupManagement from '@/composables/useGroupManagement';
-import FloorSelector from './FloorSelector.vue'; // Se importa el nuevo componente
+import FloorSelector from './FloorSelector.vue';
 
 export default {
-  components: { FloorSelector }, // Se registra el nuevo componente
+  components: { FloorSelector },
   setup() {
     const store = useStore();
     
-    // La lógica de arrastre se mantiene, ya que se adapta a los datos que le lleguen
     const {
       draggingItem,
       dragPosition,
@@ -133,14 +133,12 @@ export default {
       handleDrop
     } = useDragDrop();
 
-    // --- PROPIEDADES COMPUTADAS ADAPTADAS PARA PISOS ---
     const mesasIndividuales = computed(() => store.getters['pisos/mesasDelPisoActivo']);
     const grupos = computed(() => store.getters['pisos/gruposDelPisoActivo']);
     const elementosDecorativos = computed(() => store.getters['pisos/decoracionDelPisoActivo']);
     const mesasSeleccionadas = computed(() => store.getters['pisos/mesasSeleccionadas']);
     const grupoSeleccionado = computed(() => store.getters['pisos/grupoSeleccionado']);
 
-    // Los composables de gestión se mantienen, ahora operarán sobre los datos del piso activo
     const { seleccionarMesaIndividual } = useMesaManagement();
     const { seleccionarGrupo } = useGroupManagement();
 
@@ -190,21 +188,37 @@ export default {
 
 .restaurant-map {
   position: relative;
-  width: 1180px;
+  width: 1295px;
   height: 900px;
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f8ff"/><path d="M0 50 L100 50 M50 0 L50 100" stroke="%23d0e0e0" stroke-width="0.5"/></svg>');
   background-size: 50px 50px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   user-select: none;
-  border: #3498db 3px solid;
 }
 
 /* El resto de los estilos de mesas, grupos, etc. se mantienen igual */
-.mesa, .mesa-grupo {
-  transition: transform 0.2s ease, box-shadow 0.2s ease, width 0.3s ease, height 0.3s ease;
+.mesa-grupo, .mesa {
+  transition: all 0.3s ease;
 }
 
+/* ... (resto de los estilos existentes sin cambios) ... */
+
+/* ESTILO PARA LA INSIGNIA DEL PEDIDO */
+.pedido-id-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 5px;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 0.7rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* Pegar aquí el resto de los estilos de MapContainer.vue */
 .drag-indicator {
   position: absolute;
   border-radius: 15px;
@@ -253,7 +267,6 @@ export default {
   cursor: grab;
   text-align: center;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s;
   border: 2px solid rgba(255, 255, 255, 0.3);
   z-index: 1;
   user-select: none;
@@ -327,7 +340,6 @@ export default {
   border: 2px solid rgba(255, 255, 255, 0.3);
   z-index: 2;
   user-select: none;
-  transition: all 0.2s ease;
   height: 290px;
 }
 
