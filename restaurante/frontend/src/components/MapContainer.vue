@@ -13,6 +13,7 @@
         @mouseup="handleDrop"
         @mouseleave="handleStopDrag"
       >
+        <!-- Elementos decorativos del piso activo -->
         <div
           v-for="elemento in elementosDecorativos"
           :key="elemento.id"
@@ -29,6 +30,7 @@
 
         <div class="map-boundary"></div>
 
+        <!-- Silueta de arrastre -->
         <div
           v-if="draggingItem"
           class="drag-indicator"
@@ -50,6 +52,7 @@
           ¡Mesas unidas con éxito!
         </div>
 
+        <!-- Grupos del piso activo -->
         <div
           v-for="(grupo, index) in grupos"
           :key="grupo.id"
@@ -67,13 +70,13 @@
           @click="seleccionarGrupo(grupo.id)"
         >
           <h3>Grupo {{ index + 1 }}</h3>
-          <div class="grupo-info">Capacidad: {{ grupo.capacidadTotal }}</div>
           <div class="grupo-info">Estado: {{ grupo.estado }}</div>
-          <div class="grupo-info" style="font-size: 0.9rem">
-            Mesas: {{ grupo.mesas.map(m => m.id).join(', ') }}
+          <div v-if="grupo.pedidoId" class="pedido-id-badge" title="Número de Pedido">
+            #{{ grupo.pedidoId.slice(-6) }}
           </div>
         </div>
 
+        <!-- Mesas individuales del piso activo -->
         <div
           v-for="mesa in mesasIndividuales"
           :key="mesa.id"
@@ -96,8 +99,6 @@
           <h3>Mesa {{ mesa.id }}</h3>
           <p>Cap: {{ mesa.capacidad }}</p>
           <p>Estado: {{ mesa.estado }}</p>
-
-          <!-- INSIGNIA CON EL NÚMERO DE PEDIDO -->
           <div v-if="mesa.pedidoId" class="pedido-id-badge" title="Número de Pedido">
             #{{ mesa.pedidoId.slice(-6) }}
           </div>
@@ -197,28 +198,10 @@ export default {
   user-select: none;
 }
 
-/* El resto de los estilos de mesas, grupos, etc. se mantienen igual */
-.mesa-grupo, .mesa {
-  transition: all 0.3s ease;
+.mesa, .mesa-grupo {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, width 0.3s ease, height 0.3s ease;
 }
 
-/* ... (resto de los estilos existentes sin cambios) ... */
-
-/* ESTILO PARA LA INSIGNIA DEL PEDIDO */
-.pedido-id-badge {
-  position: absolute;
-  bottom: 4px;
-  right: 5px;
-  background-color: rgba(0, 0, 0, 0.65);
-  color: white;
-  font-size: 0.7rem;
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-}
-
-/* Pegar aquí el resto de los estilos de MapContainer.vue */
 .drag-indicator {
   position: absolute;
   border-radius: 15px;
@@ -267,6 +250,7 @@ export default {
   cursor: grab;
   text-align: center;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
   border: 2px solid rgba(255, 255, 255, 0.3);
   z-index: 1;
   user-select: none;
@@ -340,6 +324,7 @@ export default {
   border: 2px solid rgba(255, 255, 255, 0.3);
   z-index: 2;
   user-select: none;
+  transition: all 0.2s ease;
   height: 290px;
 }
 
@@ -432,5 +417,18 @@ export default {
   border: 3px dashed #3498db;
   z-index: -1;
   pointer-events: none;
+}
+
+.pedido-id-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 5px;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: white;
+  font-size: 0.7rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
 }
 </style>

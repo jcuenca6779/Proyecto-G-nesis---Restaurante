@@ -2,68 +2,40 @@
   <div class="controls-panel">
     <div class="panel-header">
       <h2>Controles</h2>
-      <button class="help-button" @click="toggleInstructions">
-        ?
-      </button>
+      <button class="help-button" @click="toggleInstructions">?</button>
     </div>
 
     <div class="controls-grid">
       <div class="control-group">
-        <h3>Gestión de Mesas</h3>
+        <h3>Gestión General</h3>
         <div class="button-group">
-          <button class="badge add" @click="agregarMesaNueva">
-            ➕ Añadir Mesa
-          </button>
-          
-          <!-- BOTÓN NUEVO PARA TOMAR PEDIDO -->
-          <button 
-            class="badge tomar-pedido"
-            v-if="mesasSeleccionadas.length === 1"
-            :disabled="!sePuedeTomarPedido"
-            @click="abrirModalPedido"
-            title="Solo para mesas disponibles"
-          >
-            📋 Tomar Pedido
-          </button>
-          
-          <button
-            class="badge delete"
-            @click="eliminarMesaSeleccionada"
-            :disabled="mesasSeleccionadas.length !== 1"
-          >
-            🗑️ Eliminar Mesa
-          </button>
+          <button class="badge add" @click="agregarMesaNueva">➕ Añadir Mesa</button>
         </div>
       </div>
 
-      <!-- SECCIÓN DE INFORMACIÓN DE LA MESA SELECCIONADA -->
-      <div v-if="mesasSeleccionadas.length > 0" class="info-section">
+      <!-- SECCIÓN DE SELECCIÓN (MESA O GRUPO) -->
+      <div v-if="targetSeleccionado" class="info-section">
         <div class="selection-info">
           ✅
           <div>
-            <strong>Mesa seleccionada:</strong>
-            <p>{{ mesasSeleccionadas.join(', ') }}</p>
-            <button
-              class="btn-editar-mesa"
-              v-if="mesasSeleccionadas.length === 1"
-              @click="abrirMenuMesa(mesasSeleccionadas[0])"
-            >
-              ✏️ Editar Mesa
-            </button>
+            <strong>{{ esGrupoSeleccionado ? 'Grupo Seleccionado' : 'Mesa Seleccionada:' }}</strong>
+            <p>{{ esGrupoSeleccionado ? `Grupo ${grupoIndex + 1}` : targetSeleccionado.id }}</p>
+            
+            <!-- Acciones para Mesa -->
+            <div v-if="!esGrupoSeleccionado" class="action-buttons">
+              <button @click="abrirModalPedido" class="btn-accion tomar-pedido" :disabled="targetSeleccionado.estado !== 'disponible'">📋 Tomar Pedido</button>
+              <button @click="abrirModalEditarPedido" class="btn-accion editar-pedido" v-if="targetSeleccionado.pedidoId">📄 Ver/Editar Pedido</button>
+              <button @click="abrirMenuMesa(targetSeleccionado.id)" class="btn-accion editar-mesa">✏️ Editar Mesa</button>
+              <button @click="eliminarMesaSeleccionada" class="btn-accion eliminar" :disabled="!!targetSeleccionado.pedidoId">🗑️ Eliminar</button>
+            </div>
+            
+            <!-- Acciones para Grupo -->
+            <div v-if="esGrupoSeleccionado" class="action-buttons">
+              <button @click="abrirModalPedido" class="btn-accion tomar-pedido" :disabled="targetSeleccionado.estado !== 'disponible'">📋 Tomar Pedido</button>
+              <button @click="abrirModalEditarPedido" class="btn-accion editar-pedido" v-if="targetSeleccionado.pedidoId">📄 Ver/Editar Pedido</button>
+              <button @click="separarGrupoSeleccionado" class="btn-accion separar" :disabled="!!targetSeleccionado.pedidoId">✂️ Separar Grupo</button>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN DE ACCIONES DEL GRUPO SELECCIONADO -->
-      <div v-if="grupoSeleccionado" class="control-group">
-        <h3>Acciones de Grupo</h3>
-        <div class="button-group">
-          <button
-            class="badge separar"
-            @click="separarGrupoSeleccionado"
-          >
-            ✂️ Separar grupo
-          </button>
         </div>
       </div>
     </div>
@@ -79,33 +51,31 @@ import useGroupManagement from '@/composables/useGroupManagement';
 export default {
   setup() {
     const store = useStore();
-    const {
-      agregarMesaNueva,
-      eliminarMesaSeleccionada,
-      abrirMenuMesa
-    } = useMesaManagement();
+    const { agregarMesaNueva, eliminarMesaSeleccionada, abrirMenuMesa } = useMesaManagement();
     const { separarGrupoSeleccionado } = useGroupManagement();
 
-    // Propiedades computadas que leen del store de 'pisos'
     const mesasSeleccionadas = computed(() => store.getters['pisos/mesasSeleccionadas']);
-    const grupoSeleccionado = computed(() => store.getters['pisos/grupoSeleccionado']);
+    const grupoSeleccionadoId = computed(() => store.getters['pisos/grupoSeleccionado']);
+    const esGrupoSeleccionado = computed(() => !!grupoSeleccionadoId.value);
 
-    // Obtiene el objeto completo de la mesa seleccionada para verificar su estado
-    const mesaSeleccionada = computed(() => {
-        if (mesasSeleccionadas.value.length === 1) {
-            return store.getters['pisos/mesaById'](mesasSeleccionadas.value[0]);
-        }
-        return null;
+    const targetSeleccionado = computed(() => {
+      if (esGrupoSeleccionado.value) return store.getters['pisos/grupoById'](grupoSeleccionadoId.value);
+      if (mesasSeleccionadas.value.length === 1) return store.getters['pisos/mesaById'](mesasSeleccionadas.value[0]);
+      return null;
     });
 
-    // Determina si el botón "Tomar Pedido" debe estar activo
-    const sePuedeTomarPedido = computed(() => {
-        return mesaSeleccionada.value && mesaSeleccionada.value.estado === 'disponible';
+    const grupoIndex = computed(() => {
+        if(!esGrupoSeleccionado.value) return -1;
+        return store.getters['pisos/gruposDelPisoActivo'].findIndex(g => g.id === grupoSeleccionadoId.value);
     });
 
-    // Abre el modal para tomar el pedido
     const abrirModalPedido = () => {
         store.commit('modal/SET_TYPE', 'tomarPedido');
+        store.commit('modal/SET_SHOW', true);
+    };
+
+    const abrirModalEditarPedido = () => {
+        store.commit('modal/SET_TYPE', 'editarPedido');
         store.commit('modal/SET_SHOW', true);
     };
 
@@ -115,40 +85,28 @@ export default {
     };
 
     return {
-      mesasSeleccionadas,
-      grupoSeleccionado,
-      sePuedeTomarPedido,
+      targetSeleccionado,
+      esGrupoSeleccionado,
+      grupoIndex,
       agregarMesaNueva,
       eliminarMesaSeleccionada,
       abrirMenuMesa,
       separarGrupoSeleccionado,
-      toggleInstructions,
-      abrirModalPedido
+      abrirModalPedido,
+      abrirModalEditarPedido,
+      toggleInstructions
     };
   }
 };
 </script>
 
 <style scoped>
-.btn-editar-mesa {
-  margin-top: 10px;
-  padding: 8px 15px;
-  background: #3498db;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-}
-.btn-editar-mesa:hover {
-  background: #2980b9;
-  transform: translateY(-2px);
-}
-.badge.tomar-pedido {
-  background: linear-gradient(to bottom, #3498db, #2980b9);
-}
+.action-buttons { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+.btn-accion { padding: 8px 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; }
+.btn-accion:disabled { opacity: 0.5; cursor: not-allowed; }
+.tomar-pedido { background-color: #3498db; }
+.editar-pedido { background-color: #f39c12; }
+.editar-mesa { background-color: #9b59b6; }
+.separar { background-color: #e67e22; }
+.eliminar { background-color: #e74c3c; }
 </style>

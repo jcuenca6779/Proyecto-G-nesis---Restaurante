@@ -103,6 +103,26 @@ export default {
         }
     },
     SET_EDITED_MESA(state, mesa) { state.mesaEditada = mesa; },
+    ASIGNAR_PEDIDO(state, { pisoId, targetId, pedidoId, isGroup }) {
+        const piso = state.pisos.find(p => p.id === pisoId);
+        if (!piso) return;
+        const targetList = isGroup ? piso.grupos : piso.mesas;
+        const target = targetList.find(t => t.id === targetId);
+        if (target) {
+            target.pedidoId = pedidoId;
+            target.estado = ESTADOS_MESA.OCUPADA;
+        }
+    },
+    LIBERAR_MESA_O_GRUPO(state, { pisoId, targetId, isGroup }) {
+        const piso = state.pisos.find(p => p.id === pisoId);
+        if (!piso) return;
+        const targetList = isGroup ? piso.grupos : piso.mesas;
+        const target = targetList.find(t => t.id === targetId);
+        if (target) {
+            target.pedidoId = null;
+            target.estado = ESTADOS_MESA.DISPONIBLE;
+        }
+    },
   },
 
   actions: {
@@ -212,6 +232,51 @@ export default {
     },
     updateGrupoPosition({ commit, state }, { id, x, y }) {
         commit('UPDATE_GRUPO_POSITION', { pisoId: state.pisoActivoId, id, x, y });
+    },
+    asignarPedido({ commit, state }, { targetId, pedidoId, isGroup }) {
+        commit('ASIGNAR_PEDIDO', { pisoId: state.pisoActivoId, targetId, pedidoId, isGroup });
+    },
+
+    liberarMesaOGrupo({ commit, state }, { targetId, isGroup }) {
+        commit('LIBERAR_MESA_O_GRUPO', { pisoId: state.pisoActivoId, targetId, isGroup });
+    },
+    
+    // ACCIONES CON NUEVAS REGLAS DE NEGOCIO
+    deleteMesa({ commit, state, getters }, mesaId) {
+        const mesa = getters.mesaById(mesaId);
+        if (mesa && mesa.pedidoId) {
+            alert('No se puede eliminar una mesa con un pedido activo.');
+            return;
+        }
+        commit('DELETE_MESA', { pisoId: state.pisoActivoId, mesaId });
+        commit('SET_SELECTED_MESAS', []);
+    },
+
+    updateMesa({ commit, state, getters }, mesaActualizada) {
+        const mesaOriginal = getters.mesaById(mesaActualizada.id);
+        if (mesaOriginal.pedidoId && mesaOriginal.estado !== mesaActualizada.estado) {
+            alert('No se puede cambiar el estado de una mesa con un pedido activo.');
+            return;
+        }
+        if (mesaOriginal.estado === 'ocupada' && mesaActualizada.estado === 'reservada') {
+            alert('Una mesa ocupada no puede ser marcada como reservada.');
+            return;
+        }
+        commit('UPDATE_MESA', { pisoId: state.pisoActivoId, mesaActualizada });
+    },
+
+    separarGrupo({ commit, state, getters }, grupoId) {
+        const grupo = getters.grupoById(grupoId);
+        if (grupo && grupo.pedidoId) {
+            alert('No se puede separar un grupo con un pedido activo.');
+            return;
+        }
+        if (!grupo) return;
+        grupo.mesas.forEach(mesa => {
+            commit('ADD_MESA', { pisoId: state.pisoActivoId, mesa: { ...mesa, estado: 'disponible', pedidoId: null } });
+        });
+        commit('DELETE_GRUPO', { pisoId: state.pisoActivoId, grupoId });
+        commit('SET_SELECTED_GROUP', null);
     },
   }
 };

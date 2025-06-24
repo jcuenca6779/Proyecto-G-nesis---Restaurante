@@ -11,7 +11,8 @@
       <EditMesaForm v-if="modalType === 'editMesa'" />
       <AddMesaForm v-if="modalType === 'addMesa'" />
       <InstructionsModal v-if="modalType === 'instructions'" />
-      <TomarPedidoForm v-if="modalType === 'tomarPedido'" />
+      <PedidoForm v-if="modalType === 'tomarPedido' || modalType === 'editarPedido'" />
+      <FacturaModal v-if="modalType === 'factura'" />
     </Modal>
   </div>
 </template>
@@ -27,8 +28,8 @@ import Modal from '@/components/Modal.vue';
 import EditMesaForm from '@/components/EditMesaForm.vue';
 import AddMesaForm from '@/components/AddMesaForm.vue';
 import InstructionsModal from '@/components/InstructionsModal.vue';
-import TomarPedidoForm from '@/components/TomarPedidoForm.vue'; // <-- IMPORTAR
-
+import PedidoForm from '@/components/PedidoForm.vue';
+import FacturaModal from '@/components/FacturaModal.vue';
 
 export default {
   name: 'App',
@@ -37,21 +38,19 @@ export default {
     ControlsPanel,
     MapContainer,
     StatsPanel,
+    Modal,
     EditMesaForm,
     AddMesaForm,
-    Modal,
     InstructionsModal,
-    TomarPedidoForm
+    PedidoForm,
+    FacturaModal,
   },
   setup() {
     const store = useStore();
-    const showModal = computed(() => store.state.modal?.show);
-    const modalType = computed(() => store.state.modal?.type);
+    const showModal = computed(() => store.state.modal.show);
+    const modalType = computed(() => store.state.modal.type);
     
-    return { 
-      showModal,
-      modalType
-    };
+    return { showModal, modalType };
   }
 };
 </script>
