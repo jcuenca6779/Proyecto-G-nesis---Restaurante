@@ -28,29 +28,15 @@
         <div class="selection-info">
           ✅
           <div>
-            <strong>
-              {{ mesasSeleccionadas.length > 1 ? 'Mesas seleccionadas:' : 'Mesa seleccionada:' }}
-            </strong>
+            <strong>Mesa seleccionada:</strong>
             <p>{{ mesasSeleccionadas.join(', ') }}</p>
             <button
               class="btn-editar-mesa"
+              v-if="mesasSeleccionadas.length === 1"
               @click="abrirMenuMesa(mesasSeleccionadas[0])"
             >
               ✏️ Editar Mesa
             </button>
-          </div>
-        </div>
-
-        <div
-          v-if="mesaSeleccionada && esMesaOcupada(mesaSeleccionada)"
-          class="status-info"
-        >
-          ⚠️
-          <div>
-            <strong>¡Atención!</strong>
-            <p>
-              La mesa está ocupada y no puede ser marcada como reservada
-            </p>
           </div>
         </div>
       </div>
@@ -71,81 +57,59 @@
 </template>
 
 <script>
-import { computed } from 'vue'
-import { useStore } from 'vuex'
-import useMesaManagement from '@/composables/useMesaManagement'
-import useGroupManagement from '@/composables/useGroupManagement'
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import useMesaManagement from '@/composables/useMesaManagement';
+import useGroupManagement from '@/composables/useGroupManagement';
 
 export default {
   setup() {
-    const store = useStore()
+    const store = useStore();
     const {
       agregarMesaNueva,
       eliminarMesaSeleccionada,
-      abrirMenuMesa,
-      esMesaOcupada
-    } = useMesaManagement()
-    const { separarGrupoSeleccionado } = useGroupManagement()
+      abrirMenuMesa
+    } = useMesaManagement();
+    const { separarGrupoSeleccionado } = useGroupManagement();
 
-    const mesasSeleccionadas = computed(() => store.state.mesas.mesasSeleccionadas)
-    const grupoSeleccionado = computed(() => store.state.grupos.grupoSeleccionado)
-    const mesaSeleccionada = computed(() => {
-      if (mesasSeleccionadas.value.length === 1) {
-        return store.getters['mesas/mesaById'](mesasSeleccionadas.value[0]);
-      }
-      return null
-    });
+    const mesasSeleccionadas = computed(() => store.getters['pisos/mesasSeleccionadas']);
+    const grupoSeleccionado = computed(() => store.getters['pisos/grupoSeleccionado']);
 
     const toggleInstructions = () => {
-      store.commit('modal/SET_TYPE', 'instructions')
-      store.commit('modal/SET_SHOW', true)
-    }
+      store.commit('modal/SET_TYPE', 'instructions');
+      store.commit('modal/SET_SHOW', true);
+    };
 
     return {
       mesasSeleccionadas,
       grupoSeleccionado,
-      mesaSeleccionada,
       agregarMesaNueva,
       eliminarMesaSeleccionada,
       abrirMenuMesa,
-      esMesaOcupada,
       separarGrupoSeleccionado,
       toggleInstructions
-    }
+    };
   }
-}
+};
 </script>
 
 <style scoped>
-/* ESTILOS ÚNICOS QUE SE MANTIENEN */
-.mesa-list {
-  margin-top: 8px;
-}
-
-.mesa-item {
-  padding: 4px 0;
-  display: flex;
-  justify-content: space-between;
+.btn-editar-mesa {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
   align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
 }
-
-.estado-badge {
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  text-transform: capitalize;
-  color: white; /* Color de texto es común a todos */
-}
-
-.estado-badge.disponible {
-  background-color: #27ae60;
-}
-
-.estado-badge.ocupada {
-  background-color: #e74c3c;
-}
-
-.estado-badge.reservada {
-  background-color: #f39c12;
+.btn-editar-mesa:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
 }
 </style>

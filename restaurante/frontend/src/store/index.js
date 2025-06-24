@@ -1,14 +1,10 @@
-import { createStore } from 'vuex'
-import mesas from './modules/mesas'
-import grupos from './modules/grupos'
-import modal from './modules/modal'
-import app from './modules/app'
+import { createStore } from 'vuex';
+import pisos from './modules/pisos'; // <-- NUEVO
+import modal from './modules/modal';
 
 export default createStore({
   modules: {
-    mesas,
-    grupos,
-    modal,
-    app
+    pisos, // <-- NUEVO
+    modal
   }
-})
+});

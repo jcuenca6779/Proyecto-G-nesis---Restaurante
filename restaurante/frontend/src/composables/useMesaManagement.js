@@ -1,57 +1,41 @@
-import { useStore } from 'vuex'
-import { ESTADOS_MESA } from '@/utils/constants'
+import { useStore } from 'vuex';
 
 export default function useMesaManagement() {
-  const store = useStore()
+  const store = useStore();
 
   const agregarMesaNueva = () => {
     store.commit('modal/SET_TYPE', 'addMesa');
     store.commit('modal/SET_SHOW', true);
-  }
-
-  const confirmarNuevaMesa = () => {
-    store.dispatch('mesas/addMesa')
-  }
+  };
 
   const eliminarMesaSeleccionada = () => {
+    const mesasSeleccionadas = store.getters['pisos/mesasSeleccionadas'];
     if (confirm('¿Está seguro de eliminar esta mesa?')) {
-        
-    if (store.state.mesas.mesasSeleccionadas.length === 1) {
-      store.dispatch('mesas/deleteMesa', store.state.mesas.mesasSeleccionadas[0])
+      if (mesasSeleccionadas.length === 1) {
+        store.dispatch('pisos/deleteMesa', mesasSeleccionadas[0]);
+      }
     }
-}
-  }
+  };
 
   const abrirMenuMesa = (id) => {
-    const mesa = store.getters['mesas/mesaById'](id)
+    const mesa = store.getters['pisos/mesaById'](id);
     if (mesa) {
-      store.commit('mesas/SET_EDITED_MESA', { ...mesa })
-      store.commit('modal/SET_SHOW', true)
-      store.commit('modal/SET_TYPE', 'editMesa')
+      store.commit('pisos/SET_EDITED_MESA', { ...mesa });
+      store.commit('modal/SET_TYPE', 'editMesa');
+      store.commit('modal/SET_SHOW', true);
     }
-  }
-
-  const guardarCambiosMesa = () => {
-    store.dispatch('mesas/updateMesa')
-  }
+  };
 
   const seleccionarMesaIndividual = (id) => {
-    store.commit('grupos/SET_SELECTED_GROUP', null)
-    store.commit('mesas/SET_SELECTED_MESAS', [id])
-  }
-
-  const esMesaOcupada = (mesa) => {
-    if (!mesa) return false;
-    return mesa.estado === ESTADOS_MESA.OCUPADA;
+    // Deselecciona cualquier grupo y selecciona la mesa
+    store.commit('pisos/SET_SELECTED_GROUP', null);
+    store.commit('pisos/SET_SELECTED_MESAS', [id]);
   };
 
   return {
     agregarMesaNueva,
-    confirmarNuevaMesa,
     eliminarMesaSeleccionada,
     abrirMenuMesa,
-    guardarCambiosMesa,
-    seleccionarMesaIndividual,
-    esMesaOcupada
-  }
+    seleccionarMesaIndividual
+  };
 }

@@ -1,99 +1,106 @@
 <template>
-  <div class="map-container"
-    @mousemove="handleDragMove"
-    @mouseup="handleDrop"
-    @mouseleave="handleStopDrag">
-    <div
-      class="restaurant-map"
+  <div class="map-container-wrapper">
+    <FloorSelector />
+    <div 
+      class="map-container"
       @mousemove="handleDragMove"
       @mouseup="handleDrop"
       @mouseleave="handleStopDrag"
     >
       <div
-        v-for="elemento in elementosDecorativos"
-        :key="elemento.id"
-        :class="['layout-elemento', elemento.tipo]"
-        :style="{
-          left: elemento.x + 'px', 
-          top: elemento.y + 'px', 
-          width: elemento.width + 'px', 
-          height: elemento.height + 'px',
-          transform: 'rotate(' + (elemento.rotacion || 0) + 'deg)',
-          backgroundColor: elemento.color 
-        }"
-      ></div>
-
-      <div class="map-boundary"></div>
-
-      <div
-        v-if="draggingItem"
-        class="drag-indicator"
-        :style="{
-          left: dragPosition.x + 'px',
-          top: dragPosition.y + 'px',
-          width: draggingItem.type === 'mesa' 
-            ? `${(draggingItem.anchoCuadriculas || 3) * 50}px` 
-            : `${(draggingItem.anchoCuadriculas || 8) * 40}px`,
-          height: draggingItem.type === 'mesa' 
-            ? `${(draggingItem.altoCuadriculas || 3) * 50}px` 
-            : '290px'
-        }"
+        class="restaurant-map"
+        @mousemove="handleDragMove"
+        @mouseup="handleDrop"
+        @mouseleave="handleStopDrag"
       >
-        {{ draggingItem.type === 'mesa' ? `Mesa ${draggingItem.id}` : draggingItem.displayId }}
-      </div>
+        <!-- Elementos decorativos del piso activo -->
+        <div
+          v-for="elemento in elementosDecorativos"
+          :key="elemento.id"
+          :class="['layout-elemento', elemento.tipo]"
+          :style="{
+            left: elemento.x + 'px', 
+            top: elemento.y + 'px', 
+            width: elemento.width + 'px', 
+            height: elemento.height + 'px',
+            transform: 'rotate(' + (elemento.rotacion || 0) + 'deg)',
+            backgroundColor: elemento.color 
+          }"
+        ></div>
 
-      <div class="union-feedback" :class="{ show: showUnionFeedback }">
-        ¡Mesas unidas con éxito!
-      </div>
+        <div class="map-boundary"></div>
 
-      <div
-        v-for="(grupo, index) in grupos"
-        :key="grupo.id"
-        class="mesa-grupo"
-        :class="{ 
-          'grupo-seleccionado': grupoSeleccionado === grupo.id,
-          'dragging': draggingItem && draggingItem.type === 'grupo' && draggingItem.id === grupo.id
-        }"
-        :style="{ 
-          left: grupo.x + 'px', 
-          top: grupo.y + 'px',
-          width: (grupo.anchoCuadriculas || 8) * 40 + 'px', 
-        }"
-        @mousedown="startDrag($event, { ...grupo, displayId: `Grupo ${index + 1}` }, 'grupo')"
-        @click="seleccionarGrupo(grupo.id)"
-      >
-        <h3>Grupo {{ index + 1 }}</h3>
-        <div class="grupo-info">
-          Capacidad: {{ grupo.capacidadTotal }}
+        <!-- Silueta de arrastre -->
+        <div
+          v-if="draggingItem"
+          class="drag-indicator"
+          :style="{
+            left: dragPosition.x + 'px',
+            top: dragPosition.y + 'px',
+            width: draggingItem.type === 'mesa' 
+              ? `${(draggingItem.anchoCuadriculas || 3) * 50}px` 
+              : `${(draggingItem.anchoCuadriculas || 8) * 40}px`,
+            height: draggingItem.type === 'mesa' 
+              ? `${(draggingItem.altoCuadriculas || 3) * 50}px` 
+              : '290px'
+          }"
+        >
+          {{ draggingItem.type === 'mesa' ? `Mesa ${draggingItem.id}` : draggingItem.displayId }}
         </div>
-        <div class="grupo-info">Estado: {{ grupo.estado }}</div>
-        <div class="grupo-info" style="font-size: 0.9rem">
-          Mesas: {{ grupo.mesas.map(m => m.id).join(', ') }}
-        </div>
-      </div>
 
-      <div
-        v-for="mesa in mesasIndividuales"
-        :key="mesa.id"
-        class="mesa"
-        :class="{
-          'mesa-seleccionada': mesasSeleccionadas.includes(mesa.id),
-          'dragging': draggingItem && draggingItem.type === 'mesa' && draggingItem.id === mesa.id,
-          'drop-target': dropTarget === mesa.id
-        }"
-        :style="{ 
-          left: mesa.x + 'px', 
-          top: mesa.y + 'px',
-          width: (mesa.anchoCuadriculas || 3) * 50 + 'px',
-          height: (mesa.altoCuadriculas || 3) * 50 + 'px',
-          backgroundColor: obtenerColor(mesa.estado) 
-        }"
-        @mousedown="startDrag($event, mesa, 'mesa')"
-        @click="seleccionarMesaIndividual(mesa.id)"
-      >
-        <h3>Mesa {{ mesa.id }}</h3>
-        <p>Cap: {{ mesa.capacidad }}</p>
-        <p>Estado: {{ mesa.estado }}</p>
+        <div class="union-feedback" :class="{ show: showUnionFeedback }">
+          ¡Mesas unidas con éxito!
+        </div>
+
+        <!-- Grupos del piso activo -->
+        <div
+          v-for="(grupo, index) in grupos"
+          :key="grupo.id"
+          class="mesa-grupo"
+          :class="{ 
+            'grupo-seleccionado': grupoSeleccionado === grupo.id,
+            'dragging': draggingItem && draggingItem.type === 'grupo' && draggingItem.id === grupo.id
+          }"
+          :style="{ 
+            left: grupo.x + 'px', 
+            top: grupo.y + 'px',
+            width: (grupo.anchoCuadriculas || 8) * 40 + 'px', 
+          }"
+          @mousedown="startDrag($event, { ...grupo, displayId: `Grupo ${index + 1}` }, 'grupo')"
+          @click="seleccionarGrupo(grupo.id)"
+        >
+          <h3>Grupo {{ index + 1 }}</h3>
+          <div class="grupo-info">Capacidad: {{ grupo.capacidadTotal }}</div>
+          <div class="grupo-info">Estado: {{ grupo.estado }}</div>
+          <div class="grupo-info" style="font-size: 0.9rem">
+            Mesas: {{ grupo.mesas.map(m => m.id).join(', ') }}
+          </div>
+        </div>
+
+        <!-- Mesas individuales del piso activo -->
+        <div
+          v-for="mesa in mesasIndividuales"
+          :key="mesa.id"
+          class="mesa"
+          :class="{
+            'mesa-seleccionada': mesasSeleccionadas.includes(mesa.id),
+            'dragging': draggingItem && draggingItem.type === 'mesa' && draggingItem.id === mesa.id,
+            'drop-target': dropTarget === mesa.id
+          }"
+          :style="{ 
+            left: mesa.x + 'px', 
+            top: mesa.y + 'px',
+            width: (mesa.anchoCuadriculas || 3) * 50 + 'px',
+            height: (mesa.altoCuadriculas || 3) * 50 + 'px',
+            backgroundColor: obtenerColor(mesa.estado) 
+          }"
+          @mousedown="startDrag($event, mesa, 'mesa')"
+          @click="seleccionarMesaIndividual(mesa.id)"
+        >
+          <h3>Mesa {{ mesa.id }}</h3>
+          <p>Cap: {{ mesa.capacidad }}</p>
+          <p>Estado: {{ mesa.estado }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -106,10 +113,14 @@ import useDragDrop from '@/composables/useDragDrop';
 import { obtenerColor } from '@/utils/helpers';
 import useMesaManagement from '@/composables/useMesaManagement';
 import useGroupManagement from '@/composables/useGroupManagement';
+import FloorSelector from './FloorSelector.vue'; // Se importa el nuevo componente
 
 export default {
+  components: { FloorSelector }, // Se registra el nuevo componente
   setup() {
     const store = useStore();
+    
+    // La lógica de arrastre se mantiene, ya que se adapta a los datos que le lleguen
     const {
       draggingItem,
       dragPosition,
@@ -122,12 +133,14 @@ export default {
       handleDrop
     } = useDragDrop();
 
-    const elementosDecorativos = computed(() => store.state.app.elementosDecorativos);
-    const mesasIndividuales = computed(() => store.state.mesas.mesasIndividuales);
-    const grupos = computed(() => store.state.grupos.grupos);
-    const mesasSeleccionadas = computed(() => store.state.mesas.mesasSeleccionadas);
-    const grupoSeleccionado = computed(() => store.state.grupos.grupoSeleccionado);
+    // --- PROPIEDADES COMPUTADAS ADAPTADAS PARA PISOS ---
+    const mesasIndividuales = computed(() => store.getters['pisos/mesasDelPisoActivo']);
+    const grupos = computed(() => store.getters['pisos/gruposDelPisoActivo']);
+    const elementosDecorativos = computed(() => store.getters['pisos/decoracionDelPisoActivo']);
+    const mesasSeleccionadas = computed(() => store.getters['pisos/mesasSeleccionadas']);
+    const grupoSeleccionado = computed(() => store.getters['pisos/grupoSeleccionado']);
 
+    // Los composables de gestión se mantienen, ahora operarán sobre los datos del piso activo
     const { seleccionarMesaIndividual } = useMesaManagement();
     const { seleccionarGrupo } = useGroupManagement();
 
@@ -155,8 +168,16 @@ export default {
 </script>
 
 <style scoped>
+.map-container-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
 .map-container {
-  flex: 1;
+  flex-grow: 1;
   position: relative;
   width: 100%;
   height: 100%;
@@ -165,9 +186,20 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #3498db;
 }
 
+.restaurant-map {
+  position: relative;
+  width: 1295px;
+  height: 900px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f8ff"/><path d="M0 50 L100 50 M50 0 L50 100" stroke="%23d0e0e0" stroke-width="0.5"/></svg>');
+  background-size: 50px 50px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* El resto de los estilos de mesas, grupos, etc. se mantienen igual */
 .mesa, .mesa-grupo {
   transition: transform 0.2s ease, box-shadow 0.2s ease, width 0.3s ease, height 0.3s ease;
 }
@@ -187,17 +219,6 @@ export default {
   font-size: 1.2rem;
   transition: width 0.2s ease, height 0.2s ease;
   box-shadow: 0 0 0 3px #27ae60;
-}
-
-.restaurant-map {
-  position: relative;
-  width: 1295px;
-  height: 900px;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f0f8ff"/><path d="M0 50 L100 50 M50 0 L50 100" stroke="%23d0e0e0" stroke-width="0.5"/></svg>');
-  background-size: 50px 50px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  user-select: none;
 }
 
 .layout-elemento {
@@ -306,7 +327,7 @@ export default {
   z-index: 2;
   user-select: none;
   transition: all 0.2s ease;
-  height: 290px; /* Altura fija que preferiste */
+  height: 290px;
 }
 
 .mesa-grupo.drop-target {

@@ -1,21 +1,23 @@
-import { useStore } from 'vuex'
+import { useStore } from 'vuex';
 
 export default function useGroupManagement() {
-  const store = useStore()
+  const store = useStore();
 
   const separarGrupoSeleccionado = () => {
-    if (store.state.grupos.grupoSeleccionado) {
-      store.dispatch('grupos/separarGrupo', store.state.grupos.grupoSeleccionado)
+    const grupoId = store.getters['pisos/grupoSeleccionado'];
+    if (grupoId) {
+      store.dispatch('pisos/separarGrupo', grupoId);
     }
-  }
+  };
 
   const seleccionarGrupo = (id) => {
-    store.commit('mesas/SET_SELECTED_MESAS', [])
-    store.commit('grupos/SET_SELECTED_GROUP', id)
-  }
+    // Deselecciona cualquier mesa y selecciona el grupo
+    store.commit('pisos/SET_SELECTED_MESAS', []);
+    store.commit('pisos/SET_SELECTED_GROUP', id);
+  };
 
   return {
     separarGrupoSeleccionado,
     seleccionarGrupo
-  }
+  };
 }

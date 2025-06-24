@@ -13,7 +13,7 @@
       <div class="stat-value">{{ estadisticas.reservadas }}</div>
     </div>
     <div class="stat-item">
-      <div>Mesas unidas</div>
+      <div>Grupos de Mesas</div>
       <div class="stat-value">{{ estadisticas.grupos }}</div>
     </div>
     <div class="stat-item">
@@ -24,30 +24,30 @@
 </template>
 
 <script>
-import { computed } from 'vue'
-import { useStore } from 'vuex'
-import { calcularEstadisticas } from '@/utils/helpers'
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import { calcularEstadisticas } from '@/utils/helpers';
 
 export default {
   setup() {
-    const store = useStore()
+    const store = useStore();
     const estadisticas = computed(() => {
       return calcularEstadisticas(
-        store.state.mesas.mesasIndividuales,
-        store.state.grupos.grupos
-      )
-    })
+        store.getters['pisos/mesasDelPisoActivo'],
+        store.getters['pisos/gruposDelPisoActivo']
+      );
+    });
 
     return {
       estadisticas
-    }
+    };
   }
-}
+};
 </script>
 
 <style scoped>
 .stats {
-  background: #2c3e50; /* Fondo azul oscuro para todo el panel */
+  background: #2c3e50;
   color: white;
   padding: 15px;
   display: grid;
@@ -59,7 +59,7 @@ export default {
 .stat-item {
   text-align: center;
   padding: 15px;
-  background: rgba(255, 255, 255, 0.1); /* Fondo semitransparente para cada tarjeta */
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   transition: transform 0.3s, box-shadow 0.3s;
 }
@@ -73,7 +73,7 @@ export default {
 .stat-item div:first-child {
   font-size: 1.1rem;
   margin-bottom: 8px;
-  color: #FFFFFF; /* Títulos en blanco */
+  color: #FFFFFF;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -83,7 +83,7 @@ export default {
 .stat-value {
   font-size: 2.5rem;
   font-weight: bold;
-  color: #3498db; /* Números en azul vibrante */
+  color: #3498db;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
 }
 </style>

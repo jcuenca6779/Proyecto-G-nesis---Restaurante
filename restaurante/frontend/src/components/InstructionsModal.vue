@@ -25,8 +25,12 @@ export default {
 <style scoped>
 .instructions-content {
   text-align: left;
-  line-height: 1.8;
+  line-height: 1.7; /* Ligeramente más compacto */
   color: #333;
+  /* Hacemos que el contenido sea desplazable si excede la altura */
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 15px; /* Espacio para la barra de scroll */
 }
 
 .instructions-content h2 {
@@ -52,11 +56,15 @@ export default {
   padding: 12px 15px;
   margin-bottom: 12px;
   border-radius: 4px;
+  /* Propiedades clave para el manejo del texto */
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .instructions-content li strong {
   color: #2c3e50;
   display: inline-block;
-  margin-bottom: 4px;
+  flex-shrink: 0; /* Evita que el texto en negrita se encoja */
 }
 </style>

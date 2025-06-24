@@ -1,5 +1,6 @@
 <template>
-  <div class="form-modal"> <h2>Añadir Nueva Mesa</h2>
+  <div class="form-modal">
+    <h2>Añadir Nueva Mesa</h2>
     
     <div v-if="errorMessage" class="error-message">
       {{ errorMessage }}
@@ -18,7 +19,6 @@
 
     <div class="form-group">
       <label for="capacidad">Capacidad (Máx. 6):</label>
-      <!-- CORRECCIÓN: Se añade el evento @input para validar -->
       <input 
         type="text" 
         id="capacidad" 
@@ -55,7 +55,7 @@ export default {
 
     const mesaParaAgregar = ref({
       id: '',
-      capacidad: '4', // Se maneja como string para la validación en tiempo real
+      capacidad: '4',
       forma: 'cuadrada',
       estado: ESTADOS_MESA.DISPONIBLE,
       anchoCuadriculas: 3,
@@ -68,9 +68,7 @@ export default {
       mesaParaAgregar.value.id = mesaParaAgregar.value.id.replace(/[^0-9]/g, '');
     };
     
-    // --- NUEVA FUNCIÓN DE VALIDACIÓN PARA CAPACIDAD ---
     const validarSoloNumerosCapacidad = () => {
-      // Reemplaza cualquier carácter que no sea un número
       const valorNumerico = mesaParaAgregar.value.capacidad.replace(/[^0-9]/g, '');
       mesaParaAgregar.value.capacidad = valorNumerico;
     };
@@ -82,53 +80,44 @@ export default {
     const confirmarMesa = () => {
       errorMessage.value = '';
       const nuevoId = parseInt(mesaParaAgregar.value.id, 10);
-      // Se convierte la capacidad a número para las validaciones
       const capacidad = parseInt(mesaParaAgregar.value.capacidad, 10);
 
-      // --- VALIDACIONES ---
-      if (!mesaParaAgregar.value.id.trim()) {
-        errorMessage.value = 'El número de mesa no puede estar vacío.';
-        return;
-      }
-      if (isNaN(nuevoId)) {
+      if (!mesaParaAgregar.value.id.trim() || isNaN(nuevoId)) {
         errorMessage.value = 'Por favor, introduce un número válido para la mesa.';
         return;
       }
-      if (nuevoId > 20) {
-        errorMessage.value = 'El número de mesa no puede ser mayor a 20.';
+      if (nuevoId > 20 || nuevoId < 1) {
+        errorMessage.value = 'El número de mesa debe estar entre 1 y 20.';
         return;
       }
 
-      // Validación para capacidad vacía o no numérica
       if (isNaN(capacidad) || mesaParaAgregar.value.capacidad.trim() === '') {
         errorMessage.value = 'La capacidad no puede estar vacía.';
         return;
       }
-      if (capacidad > 6) {
-        errorMessage.value = 'La capacidad máxima por mesa es de 6 personas.';
-        return;
-      }
-      if (capacidad < 1) {
-        errorMessage.value = 'La capacidad debe ser de al menos 1 persona.';
+      if (capacidad > 6 || capacidad < 1) {
+        errorMessage.value = 'La capacidad debe estar entre 1 y 6.';
         return;
       }
       
-      const mesasIndividualesIds = store.state.mesas.mesasIndividuales.map(m => m.id);
-      const mesasEnGruposIds = store.state.grupos.grupos.flatMap(g => g.mesas.map(m => m.id));
-      const todosLosIds = [...mesasIndividualesIds, ...mesasEnGruposIds];
+      const mesasActuales = store.getters['pisos/mesasDelPisoActivo'];
+      const gruposActuales = store.getters['pisos/gruposDelPisoActivo'];
+      
+      const mesasEnGruposIds = gruposActuales.flatMap(g => g.mesas.map(m => m.id));
+      const todosLosIds = [...mesasActuales.map(m => m.id), ...mesasEnGruposIds];
 
       if (todosLosIds.includes(nuevoId)) {
-        errorMessage.value = `El número de mesa "${nuevoId}" ya existe. Por favor, elige otro.`;
+        errorMessage.value = `El número de mesa "${nuevoId}" ya existe en este piso.`;
         return;
       }
 
       const mesaFinal = {
         ...mesaParaAgregar.value,
         id: nuevoId,
-        capacidad: capacidad // Aseguramos que se guarde como número
+        capacidad: capacidad
       };
       
-      store.dispatch('mesas/addMesa', mesaFinal);
+      store.dispatch('pisos/addMesa', mesaFinal);
       closeModal();
     };
 
@@ -136,14 +125,10 @@ export default {
       mesaParaAgregar,
       errorMessage,
       validarSoloNumerosId,
-      validarSoloNumerosCapacidad, // Exponemos la nueva función
+      validarSoloNumerosCapacidad,
       confirmarMesa,
       closeModal
     };
   }
 };
 </script>
-
-<style scoped>
-
-</style>
