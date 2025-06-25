@@ -64,15 +64,50 @@
           :style="{ 
             left: grupo.x + 'px', 
             top: grupo.y + 'px',
-            width: (grupo.anchoCuadriculas || 8) * 40 + 'px', 
+            width: (grupo.anchoCuadriculas || 8) * 40 + 'px',
+            backgroundColor: obtenerColor(grupo.estado) /* Color dinámico */
           }"
           @mousedown="startDrag($event, { ...grupo, displayId: `Grupo ${index + 1}` }, 'grupo')"
           @click="seleccionarGrupo(grupo.id)"
         >
           <h3>Grupo {{ index + 1 }}</h3>
+          <!-- === LÍNEAS RESTAURADAS === -->
+          <div class="grupo-info">Capacidad: {{ grupo.capacidadTotal }}</div>
           <div class="grupo-info">Estado: {{ grupo.estado }}</div>
+          <div class="grupo-info" style="font-size: 0.9rem">
+            Mesas: {{ grupo.mesas.map(m => m.id).join(', ') }}
+          </div>
+          <!-- ======================== -->
           <div v-if="grupo.pedidoId" class="pedido-id-badge" title="Número de Pedido">
             #{{ grupo.pedidoId.slice(-6) }}
+          </div>
+        </div>
+
+        <!-- Mesas individuales del piso activo -->
+        <div
+          v-for="mesa in mesasIndividuales"
+          :key="mesa.id"
+          class="mesa"
+          :class="{
+            'mesa-seleccionada': mesasSeleccionadas.includes(mesa.id),
+            'dragging': draggingItem && draggingItem.type === 'mesa' && draggingItem.id === mesa.id,
+            'drop-target': dropTarget === mesa.id
+          }"
+          :style="{ 
+            left: mesa.x + 'px', 
+            top: mesa.y + 'px',
+            width: (mesa.anchoCuadriculas || 3) * 50 + 'px',
+            height: (mesa.altoCuadriculas || 3) * 50 + 'px',
+            backgroundColor: obtenerColor(mesa.estado) 
+          }"
+          @mousedown="startDrag($event, mesa, 'mesa')"
+          @click="seleccionarMesaIndividual(mesa.id)"
+        >
+          <h3>Mesa {{ mesa.id }}</h3>
+          <p>Cap: {{ mesa.capacidad }}</p>
+          <p>Estado: {{ mesa.estado }}</p>
+          <div v-if="mesa.pedidoId" class="pedido-id-badge" title="Número de Pedido">
+            #{{ mesa.pedidoId.slice(-6) }}
           </div>
         </div>
 

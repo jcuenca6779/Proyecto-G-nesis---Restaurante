@@ -175,7 +175,10 @@ export default {
             id: generarId('grupo'),
             mesas: [mesa1, mesa2],
             capacidadTotal: mesa1.capacidad + mesa2.capacidad,
-            estado: ESTADOS_MESA.OCUPADA, 
+            // === CORRECCIÓN: El estado inicial de un grupo ahora es 'disponible' ===
+            estado: ESTADOS_MESA.DISPONIBLE,
+            // Se añade pedidoId nulo por consistencia
+            pedidoId: null,
             x: (mesa1.x + mesa2.x) / 2,
             y: (mesa1.y + mesa2.y) / 2,
             anchoCuadriculas: Math.min(mesa1.anchoCuadriculas + mesa2.anchoCuadriculas, 10),
